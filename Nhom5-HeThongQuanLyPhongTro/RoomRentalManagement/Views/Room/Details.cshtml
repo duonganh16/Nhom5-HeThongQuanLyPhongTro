@@ -1,0 +1,71 @@
+@model RoomRentalManagement.Models.Room
+
+@{
+    ViewData["Title"] = "Chi tiết phòng";
+}
+
+<h1>Chi tiết phòng</h1>
+
+<div>
+    <h4>Thông tin phòng</h4>
+    <hr />
+
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            Mã phòng
+        </dt>
+        <dd class="col-sm-9">
+            @Model.RoomID
+        </dd>
+
+        <dt class="col-sm-3">
+            Tên phòng
+        </dt>
+        <dd class="col-sm-9">
+            @Model.RoomName
+        </dd>
+
+        <dt class="col-sm-3">
+            Giá
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Price
+        </dd>
+
+        <dt class="col-sm-3">
+            Diện tích
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Area
+        </dd>
+
+        <dt class="col-sm-3">
+            Trạng thái
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Status
+        </dd>
+
+        <dt class="col-sm-3">
+            Mô tả
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Description
+        </dd>
+
+    </dl>
+</div>
+
+<div>
+    <a asp-action="Edit"
+       asp-route-roomid="@Model.RoomID"
+       class="btn btn-warning">
+        Sửa
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Quay lại
+    </a>
+</div>
