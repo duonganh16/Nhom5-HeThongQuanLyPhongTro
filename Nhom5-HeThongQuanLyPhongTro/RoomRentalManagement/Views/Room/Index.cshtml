@@ -1,0 +1,56 @@
+@model IEnumerable<RoomRentalManagement.Models.Room>
+
+@{
+    ViewData["Title"] = "Danh sách phòng";
+}
+
+<h1>Danh sách phòng</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Thêm phòng mới</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Mã phòng</th>
+            <th>Tên phòng</th>
+            <th>Giá</th>
+            <th>Diện tích</th>
+            <th>Trạng thái</th>
+            <th>Mô tả</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.RoomID</td>
+                <td>@item.RoomName</td>
+                <td>@item.Price</td>
+                <td>@item.Area</td>
+                <td>@item.Status</td>
+                <td>@item.Description</td>
+
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-roomid="@item.RoomID">
+                        Sửa
+                    </a>
+                    |
+                    <a asp-action="Details"
+                       asp-route-roomid="@item.RoomID">
+                        Chi tiết
+                    </a>
+                    |
+                    <a asp-action="Delete"
+                       asp-route-roomid="@item.RoomID">
+                        Xóa
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

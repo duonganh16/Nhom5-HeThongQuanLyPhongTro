@@ -1,0 +1,67 @@
+@model RoomRentalManagement.Models.Room
+
+@{
+    ViewData["Title"] = "Xóa phòng";
+}
+
+<h1>Xóa phòng</h1>
+
+<h3>Bạn có chắc chắn muốn xóa phòng này?</h3>
+
+<hr />
+
+<dl class="row">
+
+    <dt class="col-sm-3">
+        Mã phòng
+    </dt>
+    <dd class="col-sm-9">
+        @Model.RoomID
+    </dd>
+
+    <dt class="col-sm-3">
+        Tên phòng
+    </dt>
+    <dd class="col-sm-9">
+        @Model.RoomName
+    </dd>
+
+    <dt class="col-sm-3">
+        Giá
+    </dt>
+    <dd class="col-sm-9">
+        @Model.Price
+    </dd>
+
+    <dt class="col-sm-3">
+        Diện tích
+    </dt>
+    <dd class="col-sm-9">
+        @Model.Area
+    </dd>
+
+    <dt class="col-sm-3">
+        Trạng thái
+    </dt>
+    <dd class="col-sm-9">
+        @Model.Status
+    </dd>
+
+</dl>
+
+<form asp-action="Delete" method="post">
+
+    <input type="hidden"
+           asp-for="RoomID" />
+
+    <button type="submit"
+            class="btn btn-danger">
+        Xóa
+    </button>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Hủy
+    </a>
+
+</form>
