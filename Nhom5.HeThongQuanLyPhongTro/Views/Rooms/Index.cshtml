@@ -1,0 +1,313 @@
+@{
+    ViewData["Title"] = "Quản lý phòng";
+}
+
+<style>
+    .rooms-panel {
+        padding: 24px;
+        background: white;
+        border: 1px solid #e5eaf2;
+        border-radius: 15px;
+    }
+
+    .rooms-title {
+        color: #172554;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .rooms-description {
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .room-search {
+        max-width: 300px;
+    }
+
+    .room-table th {
+        padding: 14px 12px;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .room-table td {
+        padding: 16px 12px;
+        vertical-align: middle;
+    }
+
+    .room-code {
+        color: #1d4ed8;
+        font-weight: 700;
+    }
+
+    .room-status {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .room-rented {
+        color: #15803d;
+        background: #dcfce7;
+    }
+
+    .room-empty {
+        color: #1d4ed8;
+        background: #dbeafe;
+    }
+
+    .room-maintenance {
+        color: #c2410c;
+        background: #ffedd5;
+    }
+</style>
+
+<div class="rooms-panel">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h2 class="rooms-title">Quản lý phòng</h2>
+            <p class="rooms-description mb-0">
+                Theo dõi danh sách và tình trạng các phòng trọ.
+            </p>
+        </div>
+
+        <button type="button" class="btn btn-primary"
+                data-bs-toggle="modal" data-bs-target="#addRoomModal">
+            + Thêm phòng
+        </button>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-between gap-3 mb-3">
+        <input id="roomSearch" type="text"
+               class="form-control room-search"
+               placeholder="Tìm theo mã phòng..." />
+
+        <select id="roomStatusFilter" class="form-select"
+                style="max-width: 200px;">
+            <option value="">Tất cả trạng thái</option>
+            <option value="Đang thuê">Đang thuê</option>
+            <option value="Còn trống">Còn trống</option>
+            <option value="Bảo trì">Bảo trì</option>
+        </select>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table room-table" id="roomsTable">
+            <thead>
+                <tr>
+                    <th>Mã phòng</th>
+                    <th>Tầng</th>
+                    <th>Diện tích</th>
+                    <th>Giá thuê/tháng</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td class="room-code">P101</td>
+                    <td>1</td>
+                    <td>20 m²</td>
+                    <td>2.500.000 đ</td>
+                    <td>
+                        <span class="room-status room-rented">Đang thuê</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="room-code">P102</td>
+                    <td>1</td>
+                    <td>18 m²</td>
+                    <td>2.200.000 đ</td>
+                    <td>
+                        <span class="room-status room-empty">Còn trống</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="room-code">P201</td>
+                    <td>2</td>
+                    <td>25 m²</td>
+                    <td>3.000.000 đ</td>
+                    <td>
+                        <span class="room-status room-rented">Đang thuê</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="room-code">P202</td>
+                    <td>2</td>
+                    <td>22 m²</td>
+                    <td>2.800.000 đ</td>
+                    <td>
+                        <span class="room-status room-maintenance">Bảo trì</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-secondary small mb-0">
+        Dữ liệu phòng hiện tại là dữ liệu mẫu để kiểm tra giao diện.
+    </p>
+</div>
+
+<div class="modal fade" id="addRoomModal" tabindex="-1"
+     aria-labelledby="addRoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addRoomForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addRoomModalLabel">
+                        Thêm phòng mới
+                    </h5>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="roomCode" class="form-label">Mã phòng</label>
+                        <input id="roomCode" class="form-control"
+                               maxlength="20" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="roomFloor" class="form-label">Tầng</label>
+                        <input id="roomFloor" type="number"
+                               class="form-control" min="1" max="100" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="roomArea" class="form-label">Diện tích (m²)</label>
+                        <input id="roomArea" type="number" step="0.1"
+                               class="form-control" min="1" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="roomPrice" class="form-label">
+                            Giá thuê/tháng (đ)
+                        </label>
+                        <input id="roomPrice" type="number"
+                               class="form-control" min="0" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="roomStatus" class="form-label">Trạng thái</label>
+                        <select id="roomStatus" class="form-select" required>
+                            <option value="Còn trống">Còn trống</option>
+                            <option value="Đang thuê">Đang thuê</option>
+                            <option value="Bảo trì">Bảo trì</option>
+                        </select>
+                    </div>
+
+                    <div id="roomFormError" class="text-danger small"
+                         role="alert"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        Lưu phòng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const roomSearch = document.getElementById("roomSearch");
+    const roomStatusFilter = document.getElementById("roomStatusFilter");
+    const roomsTableBody = document.querySelector("#roomsTable tbody");
+    const addRoomForm = document.getElementById("addRoomForm");
+    const roomFormError = document.getElementById("roomFormError");
+
+    function filterRooms() {
+        const keyword = roomSearch.value.trim().toLowerCase();
+        const status = roomStatusFilter.value;
+
+        roomsTableBody.querySelectorAll("tr").forEach(row => {
+            const code = row.cells[0].textContent.trim().toLowerCase();
+            const roomStatus = row.cells[4].textContent.trim();
+
+            row.style.display =
+                code.includes(keyword) &&
+                (!status || roomStatus === status) ? "" : "none";
+        });
+    }
+
+    roomSearch.addEventListener("input", filterRooms);
+    roomStatusFilter.addEventListener("change", filterRooms);
+
+    function getStatusClass(status) {
+        if (status === "Đang thuê") return "room-rented";
+        if (status === "Bảo trì") return "room-maintenance";
+        return "room-empty";
+    }
+
+    addRoomForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        roomFormError.textContent = "";
+
+        const code = document.getElementById("roomCode")
+            .value.trim().toUpperCase();
+        const floor = Number(document.getElementById("roomFloor").value);
+        const area = Number(document.getElementById("roomArea").value);
+        const price = Number(document.getElementById("roomPrice").value);
+        const status = document.getElementById("roomStatus").value;
+
+        if (!code || floor < 1 || area <= 0 || price < 0 ||
+            !Number.isFinite(floor) ||
+            !Number.isFinite(area) ||
+            !Number.isFinite(price)) {
+            roomFormError.textContent = "Vui lòng nhập dữ liệu hợp lệ.";
+            return;
+        }
+
+        const existingCodes = Array.from(roomsTableBody.querySelectorAll("tr"))
+            .map(row => row.cells[0].textContent.trim().toUpperCase());
+
+        if (existingCodes.includes(code)) {
+            roomFormError.textContent = "Mã phòng đã tồn tại.";
+            return;
+        }
+
+        const row = document.createElement("tr");
+        const values = [
+            code,
+            String(floor),
+            area + " m²",
+            price.toLocaleString("vi-VN") + " đ"
+        ];
+
+        values.forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        const statusCell = document.createElement("td");
+        const badge = document.createElement("span");
+        badge.className = "room-status " + getStatusClass(status);
+        badge.textContent = status;
+        statusCell.appendChild(badge);
+        row.appendChild(statusCell);
+
+        roomsTableBody.appendChild(row);
+
+        addRoomForm.reset();
+        bootstrap.Modal.getOrCreateInstance(
+            document.getElementById("addRoomModal")
+        ).hide();
+
+        filterRooms();
+    });
+</script>

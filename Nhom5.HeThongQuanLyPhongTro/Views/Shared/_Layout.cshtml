@@ -1,0 +1,299 @@
+﻿```cshtml
+<!DOCTYPE html>
+<html lang="vi">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<title>@ViewData["Title"] - Quản lý phòng trọ</title>
+
+		<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+		<link rel="stylesheet" href="~/Nhom5.HeThongQuanLyPhongTro.styles.css" asp-append-version="true" />
+
+		<style>
+			body {
+			margin: 0;
+			background: #f5f7fb;
+			color: #263248;
+			font-family: "Segoe UI", Arial, sans-serif;
+			}
+
+			.app-sidebar {
+			position: fixed;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			width: 250px;
+			background: #172554;
+			color: white;
+			padding: 24px 16px;
+			overflow-y: auto;
+			z-index: 1000;
+			}
+
+			.brand {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			padding: 4px 8px 28px;
+			color: white;
+			text-decoration: none;
+			}
+
+			.brand-icon {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 44px;
+			height: 44px;
+			border-radius: 12px;
+			background: #3b82f6;
+			font-size: 24px;
+			}
+
+			.brand-name {
+			font-size: 16px;
+			font-weight: 700;
+			}
+
+			.brand-subtitle {
+			display: block;
+			margin-top: 3px;
+			color: #cbd5e1;
+			font-size: 12px;
+			font-weight: 400;
+			}
+
+			.menu-label {
+			padding: 10px 12px;
+			color: #94a3b8;
+			font-size: 11px;
+			font-weight: 700;
+			letter-spacing: 1.2px;
+			}
+
+			.menu-link {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			padding: 12px;
+			margin-bottom: 5px;
+			border-radius: 9px;
+			color: #dbeafe;
+			text-decoration: none;
+			transition: background 0.2s;
+			}
+
+			.menu-link:hover,
+			.menu-link.active {
+			background: #2563eb;
+			color: white;
+			}
+
+			.menu-icon {
+			width: 24px;
+			text-align: center;
+			font-size: 18px;
+			}
+
+			.sidebar-footer {
+			margin-top: 30px;
+			padding: 16px 12px;
+			border-top: 1px solid #334155;
+			color: #cbd5e1;
+			font-size: 12px;
+			}
+
+			.app-main {
+			min-height: 100vh;
+			margin-left: 250px;
+			}
+
+			.topbar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 16px;
+			padding: 20px 30px;
+			background: white;
+			border-bottom: 1px solid #e5e7eb;
+			}
+
+			.page-heading {
+			margin: 0;
+			font-size: 21px;
+			font-weight: 700;
+			}
+
+			.page-description {
+			margin: 5px 0 0;
+			color: #64748b;
+			font-size: 13px;
+			}
+
+			.user-badge {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 8px 12px;
+			background: #f1f5f9;
+			border-radius: 12px;
+			font-size: 13px;
+			white-space: nowrap;
+			}
+
+			.user-avatar {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 36px;
+			height: 36px;
+			background: #dbeafe;
+			color: #1d4ed8;
+			border-radius: 50%;
+			font-weight: 700;
+			}
+
+			.content-area {
+			padding: 28px 30px;
+			}
+
+			.app-footer {
+			padding: 18px 30px;
+			color: #64748b;
+			font-size: 12px;
+			border-top: 1px solid #e5e7eb;
+			}
+
+			@@media (max-width: 768px) {
+			.app-sidebar {
+			position: relative;
+			width: 100%;
+			bottom: auto;
+			}
+
+			.app-main {
+			margin-left: 0;
+			}
+
+			.topbar {
+			padding: 16px;
+			}
+
+			.content-area {
+			padding: 18px 16px;
+			}
+
+			.page-heading {
+			font-size: 18px;
+			}
+			}
+		</style>
+	</head>
+
+	<body>
+		<aside class="app-sidebar">
+			<a class="brand"
+			   asp-controller="Home"
+			   asp-action="Index">
+				<span class="brand-icon">⌂</span>
+				<span class="brand-name">
+					NHÀ TRỌ 5
+					<span class="brand-subtitle">Hệ thống quản lý phòng trọ</span>
+				</span>
+			</a>
+
+			<div class="menu-label">TỔNG QUAN</div>
+
+			<a class="menu-link active"
+			   asp-controller="Home"
+			   asp-action="Index">
+				<span class="menu-icon">▦</span>
+				<span>Dashboard</span>
+			</a>
+
+			<div class="menu-label">QUẢN LÝ</div>
+
+			<a class="menu-link" href="#rooms">
+				<span class="menu-icon">⌂</span>
+				<span>Quản lý phòng</span>
+			</a>
+
+			<a class="menu-link" href="#tenants">
+				<span class="menu-icon">♙</span>
+				<span>Người thuê</span>
+			</a>
+
+			<a class="menu-link" href="#contracts">
+				<span class="menu-icon">▤</span>
+				<span>Hợp đồng</span>
+			</a>
+
+			<div class="menu-label">TÀI CHÍNH</div>
+
+			<a class="menu-link" href="#invoices">
+				<span class="menu-icon">▧</span>
+				<span>Hóa đơn</span>
+			</a>
+
+			<a class="menu-link" href="#payments">
+				<span class="menu-icon">₫</span>
+				<span>Thanh toán</span>
+			</a>
+
+			<a class="menu-link" href="#statistics">
+				<span class="menu-icon">▥</span>
+				<span>Thống kê</span>
+			</a>
+
+			<div class="menu-label">HỖ TRỢ</div>
+
+			<a class="menu-link" href="#requests">
+				<span class="menu-icon">♧</span>
+				<span>Yêu cầu / Sự cố</span>
+			</a>
+
+			<div class="sidebar-footer">
+				<div>Nhóm 5</div>
+				<div class="mt-1">Bản phát triển ban đầu</div>
+			</div>
+		</aside>
+
+		<div class="app-main">
+			<header class="topbar">
+				<div>
+					<h1 class="page-heading">
+						@ViewData["Title"]
+					</h1>
+					<p class="page-description">
+						Hệ thống quản lý phòng trọ
+					</p>
+				</div>
+
+				<div class="user-badge">
+					<span class="user-avatar">QL</span>
+					<span>
+						<strong>Quản lý</strong>
+						<br />
+						<span class="text-secondary">Tài khoản demo</span>
+					</span>
+				</div>
+			</header>
+
+			<main class="content-area">
+				@RenderBody()
+			</main>
+
+			<footer class="app-footer">
+				© 2026 Nhóm 5 - Hệ thống quản lý phòng trọ
+			</footer>
+		</div>
+
+		<script src="~/lib/jquery/dist/jquery.min.js"></script>
+		<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="~/js/site.js" asp-append-version="true"></script>
+
+		@await RenderSectionAsync("Scripts", required: false)
+	</body>
+</html>
