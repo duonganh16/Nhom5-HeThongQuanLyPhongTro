@@ -1,0 +1,619 @@
+
+@{
+    ViewData["Title"] = "Quản lý thanh toán";
+}
+
+<style>
+    .payment-page {
+        padding: 8px 0 24px;
+    }
+
+    .payment-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .payment-heading h2 {
+        font-size: 25px;
+        font-weight: 700;
+        color: #172554;
+        margin-bottom: 6px;
+    }
+
+    .payment-heading p {
+        color: #64748b;
+        margin: 0;
+    }
+
+    .payment-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .payment-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 3px 10px rgba(15, 23, 42, .04);
+    }
+
+    .payment-card .label {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .payment-card .number {
+        font-size: 25px;
+        font-weight: 700;
+        color: #172554;
+        overflow-wrap: anywhere;
+    }
+
+    .payment-toolbar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .payment-toolbar input,
+    .payment-toolbar select {
+        min-height: 42px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 8px 12px;
+        background: white;
+    }
+
+    .payment-toolbar input {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .payment-table-wrap {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow-x: auto;
+    }
+
+    .payment-table {
+        width: 100%;
+        min-width: 850px;
+        border-collapse: collapse;
+    }
+
+    .payment-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: left;
+        padding: 14px;
+        border-bottom: 1px solid #e2e8f0;
+        white-space: nowrap;
+    }
+
+    .payment-table td {
+        padding: 14px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+        font-size: 14px;
+    }
+
+    .payment-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .payment-code {
+        font-weight: 700;
+        color: #1d4ed8;
+    }
+
+    .payment-amount {
+        font-weight: 700;
+        color: #15803d;
+        white-space: nowrap;
+    }
+
+    .payment-status {
+        display: inline-block;
+        border-radius: 20px;
+        padding: 5px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .payment-success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .payment-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .payment-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .payment-actions button {
+        border: none;
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    .payment-delete {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .payment-add-btn {
+        border: none;
+        border-radius: 8px;
+        padding: 11px 16px;
+        background: #2563eb;
+        color: white;
+        font-weight: 600;
+    }
+
+    .payment-add-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .payment-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, .55);
+        z-index: 2000;
+        padding: 20px;
+        overflow-y: auto;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .payment-modal.show {
+        display: flex;
+    }
+
+    .payment-modal-content {
+        background: white;
+        border-radius: 14px;
+        padding: 24px;
+        width: 100%;
+        max-width: 560px;
+        margin: auto;
+    }
+
+    .payment-modal-content h3 {
+        color: #172554;
+        font-weight: 700;
+        font-size: 21px;
+        margin-bottom: 20px;
+    }
+
+    .payment-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .payment-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .payment-form-group.full {
+        grid-column: 1 / -1;
+    }
+
+    .payment-form-group label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .payment-form-group input,
+    .payment-form-group select {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 9px 11px;
+    }
+
+    .payment-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 24px;
+    }
+
+    .payment-cancel {
+        border: 1px solid #cbd5e1;
+        background: white;
+        border-radius: 8px;
+        padding: 10px 15px;
+    }
+
+    .payment-save {
+        border: none;
+        background: #2563eb;
+        color: white;
+        border-radius: 8px;
+        padding: 10px 15px;
+    }
+
+    .payment-empty {
+        padding: 28px !important;
+        text-align: center;
+        color: #64748b !important;
+    }
+
+    @@media (max-width: 768px) {
+        .payment-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .payment-heading h2 {
+            font-size: 22px;
+        }
+
+        .payment-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .payment-form-group.full {
+            grid-column: auto;
+        }
+    }
+</style>
+
+<div class="payment-page">
+    <div class="payment-heading">
+        <div>
+            <h2>Quản lý thanh toán</h2>
+            <p>Theo dõi các khoản tiền đã thu và đang chờ thanh toán.</p>
+        </div>
+
+        <button type="button" class="payment-add-btn" onclick="openPaymentModal()">
+            + Thêm thanh toán
+        </button>
+    </div>
+
+    <div class="payment-summary">
+        <div class="payment-card">
+            <div class="label">Tổng số giao dịch</div>
+            <div class="number" id="paymentCount">3</div>
+        </div>
+
+        <div class="payment-card">
+            <div class="label">Tổng tiền đã thu</div>
+            <div class="number" id="paymentCollected">6.500.000 đ</div>
+        </div>
+
+        <div class="payment-card">
+            <div class="label">Số giao dịch chờ xử lý</div>
+            <div class="number" id="paymentPendingCount">1</div>
+        </div>
+    </div>
+
+    <div class="payment-toolbar">
+        <input
+            type="text"
+            id="paymentSearch"
+            placeholder="Tìm mã giao dịch, hóa đơn hoặc người thuê..."
+            oninput="renderPayments()" />
+
+        <select id="paymentStatusFilter" onchange="renderPayments()">
+            <option value="">Tất cả trạng thái</option>
+            <option value="success">Đã thanh toán</option>
+            <option value="pending">Chờ xử lý</option>
+        </select>
+    </div>
+
+    <div class="payment-table-wrap">
+        <table class="payment-table">
+            <thead>
+                <tr>
+                    <th>Mã giao dịch</th>
+                    <th>Mã hóa đơn</th>
+                    <th>Người thanh toán</th>
+                    <th>Ngày thanh toán</th>
+                    <th>Số tiền</th>
+                    <th>Phương thức</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="paymentTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="payment-modal" id="paymentModal">
+    <div class="payment-modal-content">
+        <h3>Thêm giao dịch thanh toán</h3>
+
+        <form id="paymentForm" onsubmit="savePayment(event)">
+            <div class="payment-form-grid">
+                <div class="payment-form-group">
+                    <label for="paymentInvoice">Mã hóa đơn *</label>
+                    <input id="paymentInvoice" maxlength="30" required
+                           placeholder="VD: HDN004" />
+                </div>
+
+                <div class="payment-form-group">
+                    <label for="paymentTenant">Người thanh toán *</label>
+                    <input id="paymentTenant" maxlength="100" required
+                           placeholder="Nhập họ tên" />
+                </div>
+
+                <div class="payment-form-group">
+                    <label for="paymentDate">Ngày thanh toán *</label>
+                    <input id="paymentDate" type="date" required />
+                </div>
+
+                <div class="payment-form-group">
+                    <label for="paymentAmount">Số tiền (VNĐ) *</label>
+                    <input id="paymentAmount" type="number" min="1" step="1"
+                           required placeholder="VD: 2500000" />
+                </div>
+
+                <div class="payment-form-group">
+                    <label for="paymentMethod">Phương thức *</label>
+                    <select id="paymentMethod" required>
+                        <option value="Tiền mặt">Tiền mặt</option>
+                        <option value="Chuyển khoản">Chuyển khoản</option>
+                        <option value="Ví điện tử">Ví điện tử</option>
+                    </select>
+                </div>
+
+                <div class="payment-form-group">
+                    <label for="paymentStatus">Trạng thái *</label>
+                    <select id="paymentStatus" required>
+                        <option value="success">Đã thanh toán</option>
+                        <option value="pending">Chờ xử lý</option>
+                    </select>
+                </div>
+
+                <div class="payment-form-group full">
+                    <label for="paymentReference">Mã tham chiếu (nếu có)</label>
+                    <input id="paymentReference" maxlength="50"
+                           placeholder="Nhập mã giao dịch ngân hàng nếu có" />
+                </div>
+            </div>
+
+            <div class="payment-form-actions">
+                <button type="button" class="payment-cancel"
+                        onclick="closePaymentModal()">Hủy</button>
+                <button type="submit" class="payment-save">Lưu giao dịch</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let payments = [
+        {
+            id: "TT001",
+            invoice: "HDN001",
+            tenant: "Nguyễn Văn An",
+            date: "2026-10-02",
+            amount: 2500000,
+            method: "Chuyển khoản",
+            status: "success",
+            reference: "BANK001"
+        },
+        {
+            id: "TT002",
+            invoice: "HDN002",
+            tenant: "Trần Thị Bình",
+            date: "2026-10-05",
+            amount: 2000000,
+            method: "Tiền mặt",
+            status: "success",
+            reference: ""
+        },
+        {
+            id: "TT003",
+            invoice: "HDN003",
+            tenant: "Lê Văn Cường",
+            date: "2026-10-08",
+            amount: 2000000,
+            method: "Chuyển khoản",
+            status: "pending",
+            reference: "BANK003"
+        }
+    ];
+
+    function escapePaymentHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, function (char) {
+            return {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            }[char];
+        });
+    }
+
+    function formatPaymentMoney(amount) {
+        return Number(amount).toLocaleString("vi-VN") + " đ";
+    }
+
+    function renderPayments() {
+        const search = document.getElementById("paymentSearch").value
+            .trim().toLowerCase();
+
+        const status = document.getElementById("paymentStatusFilter").value;
+
+        const filtered = payments.filter(function (payment) {
+            const text = [
+                payment.id,
+                payment.invoice,
+                payment.tenant,
+                payment.method,
+                payment.reference
+            ].join(" ").toLowerCase();
+
+            return text.includes(search) &&
+                (!status || payment.status === status);
+        });
+
+        const tbody = document.getElementById("paymentTableBody");
+
+        if (filtered.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="8" class="payment-empty">Không tìm thấy giao dịch phù hợp.</td></tr>';
+        } else {
+            tbody.innerHTML = filtered.map(function (payment) {
+                const statusLabel = payment.status === "success"
+                    ? "Đã thanh toán"
+                    : "Chờ xử lý";
+
+                const statusClass = payment.status === "success"
+                    ? "payment-success"
+                    : "payment-pending";
+
+                return `
+                    <tr>
+                        <td><span class="payment-code">${escapePaymentHtml(payment.id)}</span></td>
+                        <td>${escapePaymentHtml(payment.invoice)}</td>
+                        <td>${escapePaymentHtml(payment.tenant)}</td>
+                        <td>${escapePaymentHtml(payment.date)}</td>
+                        <td><span class="payment-amount">${formatPaymentMoney(payment.amount)}</span></td>
+                        <td>${escapePaymentHtml(payment.method)}</td>
+                        <td><span class="payment-status ${statusClass}">${statusLabel}</span></td>
+                        <td>
+                            <div class="payment-actions">
+                                ${payment.status === "pending"
+                                    ? `<button type="button" class="btn btn-sm btn-success"
+                                        onclick="confirmPayment('${payment.id}')">Xác nhận</button>`
+                                    : ""}
+                                <button type="button" class="payment-delete"
+                                    onclick="deletePayment('${payment.id}')">Xóa</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join("");
+        }
+
+        document.getElementById("paymentCount").textContent = payments.length;
+
+        const collected = payments
+            .filter(p => p.status === "success")
+            .reduce((sum, p) => sum + Number(p.amount), 0);
+
+        document.getElementById("paymentCollected").textContent =
+            formatPaymentMoney(collected);
+
+        document.getElementById("paymentPendingCount").textContent =
+            payments.filter(p => p.status === "pending").length;
+    }
+
+    function openPaymentModal() {
+        document.getElementById("paymentForm").reset();
+
+        const today = new Date();
+        const localDate = new Date(
+            today.getTime() - today.getTimezoneOffset() * 60000
+        ).toISOString().slice(0, 10);
+
+        document.getElementById("paymentDate").value = localDate;
+        document.getElementById("paymentModal").classList.add("show");
+    }
+
+    function closePaymentModal() {
+        document.getElementById("paymentModal").classList.remove("show");
+    }
+
+    function savePayment(event) {
+        event.preventDefault();
+
+        const invoice = document.getElementById("paymentInvoice").value.trim();
+        const tenant = document.getElementById("paymentTenant").value.trim();
+        const date = document.getElementById("paymentDate").value;
+        const amount = Number(document.getElementById("paymentAmount").value);
+        const method = document.getElementById("paymentMethod").value;
+        const status = document.getElementById("paymentStatus").value;
+        const reference = document.getElementById("paymentReference").value.trim();
+
+        if (!invoice || !tenant || !date || !method || !status) {
+            alert("B vui lòng nhập đầy đủ các trường bắt buộc.");
+            return;
+        }
+
+        if (!Number.isSafeInteger(amount) || amount <= 0) {
+            alert("Số tiền phải là số nguyên lớn hơn 0.");
+            return;
+        }
+
+        if (date > new Date().toLocaleDateString("en-CA")) {
+            alert("Ngày thanh toán không được ở tương lai.");
+            return;
+        }
+
+        const id = "TT" + String(
+            Math.max(0, ...payments.map(p => Number(p.id.slice(2)) || 0)) + 1
+        ).padStart(3, "0");
+
+        payments.push({
+            id,
+            invoice,
+            tenant,
+            date,
+            amount,
+            method,
+            status,
+            reference
+        });
+
+        closePaymentModal();
+        renderPayments();
+        alert("Đã thêm giao dịch vào danh sách mẫu.");
+    }
+
+    function confirmPayment(id) {
+        const payment = payments.find(p => p.id === id);
+
+        if (!payment) return;
+
+        if (confirm("Xác nhận giao dịch " + id + " đã thanh toán?")) {
+            payment.status = "success";
+            renderPayments();
+        }
+    }
+
+    function deletePayment(id) {
+        if (!confirm("B có chắc muốn xóa giao dịch " + id + " không?")) {
+            return;
+        }
+
+        payments = payments.filter(p => p.id !== id);
+        renderPayments();
+    }
+
+    document.getElementById("paymentModal").addEventListener("click", function (event) {
+        if (event.target === this) {
+            closePaymentModal();
+        }
+    });
+
+    renderPayments();
+</script>

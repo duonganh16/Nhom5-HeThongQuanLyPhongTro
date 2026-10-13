@@ -1,4 +1,8 @@
-﻿```cshtml
+﻿
+@{
+ViewData["Title"] = ViewData["Title"] ?? "Tổng quan";
+}
+
 <!DOCTYPE html>
 <html lang="vi">
 	<head>
@@ -41,12 +45,17 @@
 			text-decoration: none;
 			}
 
+			.brand:hover {
+			color: white;
+			}
+
 			.brand-icon {
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			width: 44px;
 			height: 44px;
+			flex-shrink: 0;
 			border-radius: 12px;
 			background: #3b82f6;
 			font-size: 24px;
@@ -93,6 +102,7 @@
 
 			.menu-icon {
 			width: 24px;
+			flex-shrink: 0;
 			text-align: center;
 			font-size: 18px;
 			}
@@ -149,6 +159,7 @@
 			justify-content: center;
 			width: 36px;
 			height: 36px;
+			flex-shrink: 0;
 			background: #dbeafe;
 			color: #1d4ed8;
 			border-radius: 50%;
@@ -188,6 +199,17 @@
 			.page-heading {
 			font-size: 18px;
 			}
+
+			.user-badge {
+			padding: 6px;
+			}
+			}
+
+			@@media (max-width: 420px) {
+			.topbar {
+			align-items: flex-start;
+			flex-direction: column;
+			}
 			}
 		</style>
 	</head>
@@ -206,7 +228,7 @@
 
 			<div class="menu-label">TỔNG QUAN</div>
 
-			<a class="menu-link active"
+			<a class="menu-link"
 			   asp-controller="Home"
 			   asp-action="Index">
 				<span class="menu-icon">▦</span>
@@ -215,41 +237,55 @@
 
 			<div class="menu-label">QUẢN LÝ</div>
 
-			<a class="menu-link" href="#rooms">
+			<a class="menu-link"
+			   asp-controller="Rooms"
+			   asp-action="Index">
 				<span class="menu-icon">⌂</span>
 				<span>Quản lý phòng</span>
 			</a>
 
-			<a class="menu-link" href="#tenants">
+			<a class="menu-link"
+			   asp-controller="Tenants"
+			   asp-action="Index">
 				<span class="menu-icon">♙</span>
 				<span>Người thuê</span>
 			</a>
 
-			<a class="menu-link" href="#contracts">
+			<a class="menu-link"
+			   asp-controller="Contracts"
+			   asp-action="Index">
 				<span class="menu-icon">▤</span>
 				<span>Hợp đồng</span>
 			</a>
 
 			<div class="menu-label">TÀI CHÍNH</div>
 
-			<a class="menu-link" href="#invoices">
+			<a class="menu-link"
+			   asp-controller="Invoices"
+			   asp-action="Index">
 				<span class="menu-icon">▧</span>
 				<span>Hóa đơn</span>
 			</a>
 
-			<a class="menu-link" href="#payments">
+			<a class="menu-link"
+			   asp-controller="Payments"
+			   asp-action="Index">
 				<span class="menu-icon">₫</span>
 				<span>Thanh toán</span>
 			</a>
 
-			<a class="menu-link" href="#statistics">
+			<a class="menu-link"
+			   asp-controller="Statistics"
+			   asp-action="Index">
 				<span class="menu-icon">▥</span>
 				<span>Thống kê</span>
 			</a>
 
 			<div class="menu-label">HỖ TRỢ</div>
 
-			<a class="menu-link" href="#requests">
+			<a class="menu-link"
+			   asp-controller="Requests"
+			   asp-action="Index">
 				<span class="menu-icon">♧</span>
 				<span>Yêu cầu / Sự cố</span>
 			</a>
@@ -263,9 +299,7 @@
 		<div class="app-main">
 			<header class="topbar">
 				<div>
-					<h1 class="page-heading">
-						@ViewData["Title"]
-					</h1>
+					<h1 class="page-heading">@ViewData["Title"]</h1>
 					<p class="page-description">
 						Hệ thống quản lý phòng trọ
 					</p>

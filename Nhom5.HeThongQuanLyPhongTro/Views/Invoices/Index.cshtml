@@ -1,0 +1,737 @@
+
+@{
+    ViewData["Title"] = "Quản lý hóa đơn";
+}
+
+<style>
+    .invoice-page {
+        padding: 24px;
+        color: #172554;
+    }
+
+    .invoice-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .invoice-heading h2 {
+        margin: 0 0 6px;
+        font-size: 26px;
+        font-weight: 800;
+    }
+
+    .invoice-heading p {
+        margin: 0;
+        color: #64748b;
+    }
+
+    .invoice-panel {
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, .04);
+    }
+
+    .invoice-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .invoice-summary-card {
+        padding: 18px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .invoice-summary-card span {
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .invoice-summary-card strong {
+        display: block;
+        margin-top: 8px;
+        font-size: 22px;
+        font-weight: 800;
+    }
+
+    .invoice-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .invoice-toolbar input,
+    .invoice-toolbar select {
+        min-height: 42px;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+    }
+
+    .invoice-search {
+        flex: 1;
+        min-width: 220px;
+    }
+
+    .invoice-table-wrap {
+        overflow-x: auto;
+    }
+
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .invoice-table th {
+        padding: 14px 12px;
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 13px;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .invoice-table td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .invoice-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .invoice-status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .invoice-paid {
+        color: #166534;
+        background: #dcfce7;
+    }
+
+    .invoice-unpaid {
+        color: #991b1b;
+        background: #fee2e2;
+    }
+
+    .invoice-partial {
+        color: #92400e;
+        background: #fef3c7;
+    }
+
+    .invoice-btn {
+        padding: 10px 15px;
+        border: 0;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .invoice-btn-primary {
+        color: white;
+        background: #2563eb;
+    }
+
+    .invoice-btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+    .invoice-btn-light {
+        color: #334155;
+        background: #e2e8f0;
+    }
+
+    .invoice-action {
+        margin-right: 8px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #2563eb;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .invoice-action.delete {
+        color: #dc2626;
+    }
+
+    .invoice-empty {
+        padding: 28px !important;
+        color: #64748b;
+        text-align: center;
+    }
+
+    .invoice-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: rgba(15, 23, 42, .55);
+    }
+
+    .invoice-modal.open {
+        display: flex;
+    }
+
+    .invoice-modal-content {
+        width: 100%;
+        max-width: 650px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 24px;
+        border-radius: 16px;
+        background: white;
+    }
+
+    .invoice-modal-content h3 {
+        margin: 0 0 20px;
+        font-weight: 800;
+    }
+
+    .invoice-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .invoice-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .invoice-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .invoice-field label {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .invoice-field input,
+    .invoice-field select {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+    }
+
+    .invoice-total-preview {
+        padding: 12px;
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-weight: 800;
+    }
+
+    .invoice-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 22px;
+    }
+
+    @@media (max-width: 768px) {
+        .invoice-page {
+            padding: 14px;
+        }
+
+        .invoice-panel {
+            padding: 12px;
+        }
+
+        .invoice-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .invoice-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .invoice-field.full {
+            grid-column: auto;
+        }
+    }
+</style>
+
+<div class="invoice-page">
+    <div class="invoice-heading">
+        <div>
+            <h2>Quản lý hóa đơn</h2>
+            <p>Theo dõi tiền phòng, điện, nước và tình trạng thanh toán</p>
+        </div>
+
+        <button type="button"
+                class="invoice-btn invoice-btn-primary"
+                onclick="openInvoiceModal()">
+            + Tạo hóa đơn
+        </button>
+    </div>
+
+    <div class="invoice-summary">
+        <div class="invoice-summary-card">
+            <span>Tổng số hóa đơn</span>
+            <strong id="invoiceCount">0</strong>
+        </div>
+        <div class="invoice-summary-card">
+            <span>Tổng tiền hóa đơn</span>
+            <strong id="invoiceTotal">0 ₫</strong>
+        </div>
+        <div class="invoice-summary-card">
+            <span>Còn phải thu</span>
+            <strong id="invoiceOutstanding">0 ₫</strong>
+        </div>
+    </div>
+
+    <div class="invoice-panel">
+        <div class="invoice-toolbar">
+            <input id="invoiceSearch"
+                   class="invoice-search"
+                   type="search"
+                   placeholder="Tìm mã hóa đơn, phòng hoặc người thuê..."
+                   oninput="filterInvoices()" />
+
+            <select id="invoiceStatusFilter" onchange="filterInvoices()">
+                <option value="">Tất cả trạng thái</option>
+                <option value="Chưa thanh toán">Chưa thanh toán</option>
+                <option value="Thanh toán một phần">Thanh toán một phần</option>
+                <option value="Đã thanh toán">Đã thanh toán</option>
+            </select>
+        </div>
+
+        <div class="invoice-table-wrap">
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Mã hóa đơn</th>
+                        <th>Kỳ hóa đơn</th>
+                        <th>Phòng</th>
+                        <th>Người thuê</th>
+                        <th>Tiền phòng</th>
+                        <th>Điện + Nước</th>
+                        <th>Tổng tiền</th>
+                        <th>Đã trả</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="invoiceTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="invoiceModal" class="invoice-modal">
+    <div class="invoice-modal-content">
+        <h3 id="invoiceModalTitle">Tạo hóa đơn</h3>
+
+        <form id="invoiceForm">
+            <div class="invoice-form-grid">
+                <div class="invoice-field">
+                    <label for="invoiceCode">Mã hóa đơn *</label>
+                    <input id="invoiceCode" required maxlength="20"
+                           placeholder="VD: HDN004" />
+                </div>
+
+                <div class="invoice-field">
+                    <label for="invoicePeriod">Kỳ hóa đơn *</label>
+                    <input id="invoicePeriod" type="month" required />
+                </div>
+
+                <div class="invoice-field">
+                    <label for="invoiceRoom">Mã phòng *</label>
+                    <input id="invoiceRoom" required maxlength="20"
+                           placeholder="VD: P101" />
+                </div>
+
+                <div class="invoice-field">
+                    <label for="invoiceTenant">Người thuê *</label>
+                    <input id="invoiceTenant" required maxlength="100"
+                           placeholder="Nhập tên người thuê" />
+                </div>
+
+                <div class="invoice-field">
+                    <label for="invoiceRent">Tiền phòng (VNĐ) *</label>
+                    <input id="invoiceRent" type="number"
+                           min="0" step="1000" required value="0"
+                           oninput="updateInvoicePreview()" />
+                </div>
+
+                <div class="invoice-field">
+                    <label for="invoiceElectric">Tiền điện (VNĐ) *</label>
+                    <input id="invoiceElectric" type="number"
+                           min="0" step="1000" required value="0"
+                           oninput="updateInvoicePreview()" />
+                </div>
+
+                <div class="invoice-field">
+                    <label for="invoiceWater">Tiền nước (VNĐ) *</label>
+                    <input id="invoiceWater" type="number"
+                           min="0" step="1000" required value="0"
+                           oninput="updateInvoicePreview()" />
+                </div>
+
+                <div class="invoice-field">
+                    <label for="invoiceOther">Phí khác (VNĐ)</label>
+                    <input id="invoiceOther" type="number"
+                           min="0" step="1000" value="0"
+                           oninput="updateInvoicePreview()" />
+                </div>
+
+                <div class="invoice-field">
+                    <label for="invoicePaid">Số tiền đã trả (VNĐ)</label>
+                    <input id="invoicePaid" type="number"
+                           min="0" step="1000" required value="0"
+                           oninput="updateInvoicePreview()" />
+                </div>
+
+                <div class="invoice-field">
+                    <label for="invoiceStatus">Trạng thái</label>
+                    <select id="invoiceStatus">
+                        <option value="Chưa thanh toán">Chưa thanh toán</option>
+                        <option value="Thanh toán một phần">Thanh toán một phần</option>
+                        <option value="Đã thanh toán">Đã thanh toán</option>
+                    </select>
+                </div>
+
+                <div class="invoice-field full">
+                    <div class="invoice-total-preview">
+                        Tổng tiền: <span id="invoicePreview">0 ₫</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="invoice-modal-actions">
+                <button type="button"
+                        class="invoice-btn invoice-btn-light"
+                        onclick="closeInvoiceModal()">
+                    Hủy
+                </button>
+                <button type="submit"
+                        class="invoice-btn invoice-btn-primary">
+                    Lưu hóa đơn
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Dữ liệu minh họa, chưa kết nối database.
+    let invoices = [
+        {
+            code: "HDN001",
+            period: "2026-10",
+            room: "P101",
+            tenant: "Nguyễn Văn An",
+            rent: 3000000,
+            electric: 250000,
+            water: 100000,
+            other: 50000,
+            paid: 3400000,
+            status: "Đã thanh toán"
+        },
+        {
+            code: "HDN002",
+            period: "2026-10",
+            room: "P102",
+            tenant: "Lê Văn Cường",
+            rent: 2500000,
+            electric: 180000,
+            water: 80000,
+            other: 0,
+            paid: 1000000,
+            status: "Thanh toán một phần"
+        },
+        {
+            code: "HDN003",
+            period: "2026-10",
+            room: "P201",
+            tenant: "Trần Thị Bình",
+            rent: 2800000,
+            electric: 220000,
+            water: 90000,
+            other: 0,
+            paid: 0,
+            status: "Chưa thanh toán"
+        }
+    ];
+
+    let editingInvoiceCode = null;
+
+    function invoiceAmount(invoice) {
+        return Number(invoice.rent) + Number(invoice.electric)
+            + Number(invoice.water) + Number(invoice.other);
+    }
+
+    function formatInvoiceMoney(value) {
+        return new Intl.NumberFormat("vi-VN").format(value) + " ₫";
+    }
+
+    function escapeInvoiceHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, function (char) {
+            return {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            }[char];
+        });
+    }
+
+    function renderInvoiceSummary() {
+        const total = invoices.reduce(function (sum, item) {
+            return sum + invoiceAmount(item);
+        }, 0);
+
+        const outstanding = invoices.reduce(function (sum, item) {
+            return sum + Math.max(0, invoiceAmount(item) - Number(item.paid));
+        }, 0);
+
+        document.getElementById("invoiceCount").textContent = invoices.length;
+        document.getElementById("invoiceTotal").textContent = formatInvoiceMoney(total);
+        document.getElementById("invoiceOutstanding").textContent =
+            formatInvoiceMoney(outstanding);
+    }
+
+    function renderInvoices() {
+        const tbody = document.getElementById("invoiceTableBody");
+
+        if (invoices.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="10" class="invoice-empty">Chưa có dữ liệu hóa đơn</td></tr>';
+            renderInvoiceSummary();
+            return;
+        }
+
+        tbody.innerHTML = invoices.map(function (invoice) {
+            let statusClass = "invoice-unpaid";
+
+            if (invoice.status === "Đã thanh toán") {
+                statusClass = "invoice-paid";
+            } else if (invoice.status === "Thanh toán một phần") {
+                statusClass = "invoice-partial";
+            }
+
+            return `
+                <tr>
+                    <td><strong>${escapeInvoiceHtml(invoice.code)}</strong></td>
+                    <td>${escapeInvoiceHtml(invoice.period)}</td>
+                    <td>${escapeInvoiceHtml(invoice.room)}</td>
+                    <td>${escapeInvoiceHtml(invoice.tenant)}</td>
+                    <td>${formatInvoiceMoney(invoice.rent)}</td>
+                    <td>${formatInvoiceMoney(Number(invoice.electric) + Number(invoice.water))}</td>
+                    <td><strong>${formatInvoiceMoney(invoiceAmount(invoice))}</strong></td>
+                    <td>${formatInvoiceMoney(invoice.paid)}</td>
+                    <td>
+                        <span class="invoice-status ${statusClass}">
+                            ${escapeInvoiceHtml(invoice.status)}
+                        </span>
+                    </td>
+                    <td>
+                        <button type="button" class="invoice-action"
+                            onclick="editInvoice('${escapeInvoiceHtml(invoice.code)}')">
+                            Sửa
+                        </button>
+                        <button type="button" class="invoice-action delete"
+                            onclick="deleteInvoice('${escapeInvoiceHtml(invoice.code)}')">
+                            Xóa
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+
+        renderInvoiceSummary();
+        filterInvoices();
+    }
+
+    function filterInvoices() {
+        const keyword = document.getElementById("invoiceSearch")
+            .value.trim().toLocaleLowerCase("vi");
+
+        const status = document.getElementById("invoiceStatusFilter").value;
+
+        document.querySelectorAll("#invoiceTableBody tr").forEach(function (row) {
+            const text = row.textContent.toLocaleLowerCase("vi");
+            const matchesKeyword = text.includes(keyword);
+            const matchesStatus = !status ||
+                row.querySelector(".invoice-status")?.textContent.trim() === status;
+
+            row.style.display = matchesKeyword && matchesStatus ? "" : "none";
+        });
+    }
+
+    function updateInvoicePreview() {
+        const rent = Number(document.getElementById("invoiceRent").value) || 0;
+        const electric = Number(document.getElementById("invoiceElectric").value) || 0;
+        const water = Number(document.getElementById("invoiceWater").value) || 0;
+        const other = Number(document.getElementById("invoiceOther").value) || 0;
+
+        document.getElementById("invoicePreview").textContent =
+            formatInvoiceMoney(rent + electric + water + other);
+    }
+
+    function openInvoiceModal() {
+        editingInvoiceCode = null;
+        document.getElementById("invoiceForm").reset();
+        document.getElementById("invoiceCode").disabled = false;
+        document.getElementById("invoiceModalTitle").textContent = "Tạo hóa đơn";
+        document.getElementById("invoiceModal").classList.add("open");
+        updateInvoicePreview();
+    }
+
+    function closeInvoiceModal() {
+        document.getElementById("invoiceModal").classList.remove("open");
+    }
+
+    function editInvoice(code) {
+        const invoice = invoices.find(function (item) {
+            return item.code === code;
+        });
+
+        if (!invoice) return;
+
+        editingInvoiceCode = code;
+
+        document.getElementById("invoiceModalTitle").textContent = "Sửa hóa đơn";
+        document.getElementById("invoiceCode").value = invoice.code;
+        document.getElementById("invoiceCode").disabled = true;
+        document.getElementById("invoicePeriod").value = invoice.period;
+        document.getElementById("invoiceRoom").value = invoice.room;
+        document.getElementById("invoiceTenant").value = invoice.tenant;
+        document.getElementById("invoiceRent").value = invoice.rent;
+        document.getElementById("invoiceElectric").value = invoice.electric;
+        document.getElementById("invoiceWater").value = invoice.water;
+        document.getElementById("invoiceOther").value = invoice.other;
+        document.getElementById("invoicePaid").value = invoice.paid;
+        document.getElementById("invoiceStatus").value = invoice.status;
+        document.getElementById("invoiceModal").classList.add("open");
+        updateInvoicePreview();
+    }
+
+    function deleteInvoice(code) {
+        const invoice = invoices.find(function (item) {
+            return item.code === code;
+        });
+
+        if (!invoice) return;
+
+        if (!confirm("Bạn có chắc muốn xóa hóa đơn " + invoice.code + "?")) {
+            return;
+        }
+
+        invoices = invoices.filter(function (item) {
+            return item.code !== code;
+        });
+
+        renderInvoices();
+    }
+
+    document.getElementById("invoiceForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const invoice = {
+            code: document.getElementById("invoiceCode").value.trim(),
+            period: document.getElementById("invoicePeriod").value,
+            room: document.getElementById("invoiceRoom").value.trim(),
+            tenant: document.getElementById("invoiceTenant").value.trim(),
+            rent: Number(document.getElementById("invoiceRent").value),
+            electric: Number(document.getElementById("invoiceElectric").value),
+            water: Number(document.getElementById("invoiceWater").value),
+            other: Number(document.getElementById("invoiceOther").value) || 0,
+            paid: Number(document.getElementById("invoicePaid").value),
+            status: document.getElementById("invoiceStatus").value
+        };
+
+        if (!invoice.code || !invoice.period || !invoice.room ||
+            !invoice.tenant) {
+            alert("Vui lòng nhập đầy đủ các trường bắt buộc.");
+            return;
+        }
+
+        const amounts = [
+            invoice.rent, invoice.electric, invoice.water,
+            invoice.other, invoice.paid
+        ];
+
+        if (amounts.some(function (amount) {
+            return !Number.isFinite(amount) || amount < 0;
+        })) {
+            alert("Các khoản tiền phải là số không âm.");
+            return;
+        }
+
+        const total = invoiceAmount(invoice);
+
+        if (invoice.paid > total) {
+            alert("Số tiền đã trả không được lớn hơn tổng hóa đơn.");
+            return;
+        }
+
+        const duplicate = invoices.some(function (item) {
+            return item.code.toLowerCase() === invoice.code.toLowerCase()
+                && item.code !== editingInvoiceCode;
+        });
+
+        if (duplicate) {
+            alert("Mã hóa đơn đã tồn tại. Vui lòng nhập mã khác.");
+            return;
+        }
+
+        if (invoice.paid === 0) {
+            invoice.status = "Chưa thanh toán";
+        } else if (invoice.paid < total) {
+            invoice.status = "Thanh toán một phần";
+        } else {
+            invoice.status = "Đã thanh toán";
+        }
+
+        if (editingInvoiceCode) {
+            const index = invoices.findIndex(function (item) {
+                return item.code === editingInvoiceCode;
+            });
+
+            if (index !== -1) {
+                invoices[index] = invoice;
+            }
+        } else {
+            invoices.push(invoice);
+        }
+
+        closeInvoiceModal();
+        renderInvoices();
+    });
+
+    document.getElementById("invoiceModal").addEventListener("click", function (event) {
+        if (event.target === this) {
+            closeInvoiceModal();
+        }
+    });
+
+    renderInvoices();
+</script>

@@ -1,0 +1,491 @@
+
+@{
+    ViewData["Title"] = "Thống kê doanh thu";
+}
+
+<style>
+    .stats-page {
+        padding: 8px 0 24px;
+    }
+
+    .stats-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+
+    .stats-heading h2 {
+        color: #172554;
+        font-size: 25px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .stats-heading p {
+        color: #64748b;
+        margin: 0;
+    }
+
+    .stats-filter {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .stats-filter select,
+    .stats-filter button {
+        min-height: 40px;
+        border-radius: 8px;
+        padding: 8px 12px;
+    }
+
+    .stats-filter select {
+        border: 1px solid #cbd5e1;
+        background: white;
+    }
+
+    .stats-filter button {
+        border: none;
+        background: #2563eb;
+        color: white;
+        font-weight: 600;
+    }
+
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stats-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 3px 10px rgba(15, 23, 42, .04);
+    }
+
+    .stats-card-label {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .stats-card-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #172554;
+        overflow-wrap: anywhere;
+    }
+
+    .stats-card-note {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 10px;
+    }
+
+    .stats-panel {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 22px;
+        margin-bottom: 24px;
+        box-shadow: 0 3px 10px rgba(15, 23, 42, .04);
+    }
+
+    .stats-panel h3 {
+        color: #172554;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .stats-panel-subtitle {
+        color: #64748b;
+        font-size: 13px;
+        margin-bottom: 24px;
+    }
+
+    .stats-chart {
+        height: 260px;
+        display: flex;
+        align-items: stretch;
+        gap: 16px;
+        padding-top: 12px;
+        border-bottom: 1px solid #cbd5e1;
+        background: repeating-linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent 63px,
+            #eef2f7 64px,
+            #eef2f7 65px
+        );
+    }
+
+    .stats-chart-column {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .stats-bar {
+        width: min(52px, 80%);
+        min-height: 5px;
+        border-radius: 7px 7px 0 0;
+        background: linear-gradient(180deg, #60a5fa, #2563eb);
+        transition: height .25s ease;
+    }
+
+    .stats-bar-value {
+        font-size: 11px;
+        color: #475569;
+        font-weight: 600;
+        text-align: center;
+        overflow-wrap: anywhere;
+    }
+
+    .stats-month {
+        color: #64748b;
+        font-size: 12px;
+        margin-bottom: 10px;
+    }
+
+    .stats-bottom-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .stats-status-row {
+        margin-bottom: 20px;
+    }
+
+    .stats-status-heading {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .stats-status-track {
+        height: 10px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .stats-status-fill {
+        height: 100%;
+        border-radius: 10px;
+    }
+
+    .stats-status-paid {
+        background: #22c55e;
+    }
+
+    .stats-status-unpaid {
+        background: #f59e0b;
+    }
+
+    .stats-status-overdue {
+        background: #ef4444;
+    }
+
+    .stats-table-wrap {
+        overflow-x: auto;
+    }
+
+    .stats-table {
+        width: 100%;
+        min-width: 420px;
+        border-collapse: collapse;
+    }
+
+    .stats-table th,
+    .stats-table td {
+        padding: 13px 10px;
+        text-align: left;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+    }
+
+    .stats-table th {
+        background: #f8fafc;
+        color: #64748b;
+    }
+
+    .stats-table td {
+        color: #334155;
+    }
+
+    .stats-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .stats-empty {
+        text-align: center !important;
+        color: #64748b !important;
+        padding: 24px !important;
+    }
+
+    @@media (max-width: 1100px) {
+        .stats-cards {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .stats-bottom-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-heading h2 {
+            font-size: 22px;
+        }
+
+        .stats-panel {
+            padding: 16px;
+        }
+
+        .stats-chart {
+            gap: 6px;
+        }
+
+        .stats-bar-value {
+            font-size: 9px;
+        }
+    }
+
+    @@media (max-width: 450px) {
+        .stats-cards {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="stats-page">
+    <div class="stats-heading">
+        <div>
+            <h2>Thống kê doanh thu</h2>
+            <p>Theo dõi doanh thu và tình hình thu tiền phòng trọ.</p>
+        </div>
+
+        <div class="stats-filter">
+            <select id="statsYear">
+                <option value="2026">Năm 2026</option>
+                <option value="2025">Năm 2025</option>
+            </select>
+
+            <button type="button" onclick="renderStatistics()">
+                Xem thống kê
+            </button>
+        </div>
+    </div>
+
+    <div class="stats-cards">
+        <div class="stats-card">
+            <div class="stats-card-label">Tổng doanh thu</div>
+            <div class="stats-card-value" id="statsRevenue">0 đ</div>
+            <div class="stats-card-note">Tổng tiền đã thu trong năm được chọn</div>
+        </div>
+
+        <div class="stats-card">
+            <div class="stats-card-label">Doanh thu tháng 10</div>
+            <div class="stats-card-value" id="statsMonthlyRevenue">0 đ</div>
+            <div class="stats-card-note">Theo dữ liệu mẫu tháng 10</div>
+        </div>
+
+        <div class="stats-card">
+            <div class="stats-card-label">Hóa đơn đã thanh toán</div>
+            <div class="stats-card-value" id="statsPaidCount">0</div>
+            <div class="stats-card-note">Số hóa đơn đã thu đủ tiền</div>
+        </div>
+
+        <div class="stats-card">
+            <div class="stats-card-label">Hóa đơn chưa thu đủ</div>
+            <div class="stats-card-value" id="statsUnpaidCount">0</div>
+            <div class="stats-card-note">Cần tiếp tục theo dõi thu tiền</div>
+        </div>
+    </div>
+
+    <div class="stats-panel">
+        <h3>Doanh thu theo tháng</h3>
+        <div class="stats-panel-subtitle">
+            Đơn vị: triệu đồng. Biểu đồ minh họa theo dữ liệu mẫu.
+        </div>
+
+        <div class="stats-chart" id="statsChart"></div>
+    </div>
+
+    <div class="stats-bottom-grid">
+        <div class="stats-panel">
+            <h3>Tình trạng hóa đơn</h3>
+            <div class="stats-panel-subtitle">
+                Tỷ lệ các nhóm hóa đơn trong dữ liệu mẫu.
+            </div>
+
+            <div id="statsInvoiceStatus"></div>
+        </div>
+
+        <div class="stats-panel">
+            <h3>Doanh thu gần đây</h3>
+            <div class="stats-panel-subtitle">
+                Các khoản tiền đã thu theo tháng.
+            </div>
+
+            <div class="stats-table-wrap">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Tháng</th>
+                            <th>Số giao dịch</th>
+                            <th>Doanh thu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsRecentTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dữ liệu minh họa. Sau này sẽ thay bằng dữ liệu từ backend/database.
+    const sampleStatistics = {
+        2026: [
+            { month: 1, revenue: 12.5, paid: 8, unpaid: 2, overdue: 1 },
+            { month: 2, revenue: 14.2, paid: 9, unpaid: 2, overdue: 1 },
+            { month: 3, revenue: 13.8, paid: 8, unpaid: 3, overdue: 1 },
+            { month: 4, revenue: 15.6, paid: 10, unpaid: 2, overdue: 1 },
+            { month: 5, revenue: 16.1, paid: 10, unpaid: 2, overdue: 1 },
+            { month: 6, revenue: 15.2, paid: 9, unpaid: 3, overdue: 1 },
+            { month: 7, revenue: 17.4, paid: 11, unpaid: 2, overdue: 1 },
+            { month: 8, revenue: 18.1, paid: 11, unpaid: 2, overdue: 1 },
+            { month: 9, revenue: 16.8, paid: 10, unpaid: 3, overdue: 1 },
+            { month: 10, revenue: 6.5, paid: 2, unpaid: 1, overdue: 0 },
+            { month: 11, revenue: 0, paid: 0, unpaid: 0, overdue: 0 },
+            { month: 12, revenue: 0, paid: 0, unpaid: 0, overdue: 0 }
+        ],
+        2025: [
+            { month: 1, revenue: 10.2, paid: 7, unpaid: 2, overdue: 1 },
+            { month: 2, revenue: 11.1, paid: 7, unpaid: 2, overdue: 1 },
+            { month: 3, revenue: 12.4, paid: 8, unpaid: 2, overdue: 1 },
+            { month: 4, revenue: 12.8, paid: 8, unpaid: 2, overdue: 1 },
+            { month: 5, revenue: 13.2, paid: 9, unpaid: 2, overdue: 1 },
+            { month: 6, revenue: 14.5, paid: 9, unpaid: 2, overdue: 1 },
+            { month: 7, revenue: 14.8, paid: 9, unpaid: 2, overdue: 1 },
+            { month: 8, revenue: 15.3, paid: 10, unpaid: 2, overdue: 1 },
+            { month: 9, revenue: 14.9, paid: 9, unpaid: 3, overdue: 1 },
+            { month: 10, revenue: 15.8, paid: 10, unpaid: 2, overdue: 1 },
+            { month: 11, revenue: 16.2, paid: 10, unpaid: 2, overdue: 1 },
+            { month: 12, revenue: 17.1, paid: 11, unpaid: 2, overdue: 1 }
+        ]
+    };
+
+    function formatStatsMoney(million) {
+        return (million * 1000000).toLocaleString("vi-VN") + " đ";
+    }
+
+    function renderStatistics() {
+        const year = document.getElementById("statsYear").value;
+        const months = sampleStatistics[year];
+
+        const totalRevenue = months.reduce((sum, item) => sum + item.revenue, 0);
+        const october = months.find(item => item.month === 10);
+
+        const paidCount = months.reduce((sum, item) => sum + item.paid, 0);
+        const unpaidCount = months.reduce((sum, item) => sum + item.unpaid + item.overdue, 0);
+        const overdueCount = months.reduce((sum, item) => sum + item.overdue, 0);
+
+        document.getElementById("statsRevenue").textContent =
+            formatStatsMoney(totalRevenue);
+
+        document.getElementById("statsMonthlyRevenue").textContent =
+            formatStatsMoney(october.revenue);
+
+        document.getElementById("statsPaidCount").textContent = paidCount;
+        document.getElementById("statsUnpaidCount").textContent = unpaidCount;
+
+        const maxRevenue = Math.max(1, ...months.map(item => item.revenue));
+
+        document.getElementById("statsChart").innerHTML = months.map(item => {
+            const height = item.revenue === 0
+                ? 2
+                : Math.max(5, item.revenue / maxRevenue * 180);
+
+            return `
+                <div class="stats-chart-column">
+                    <div class="stats-bar-value">${item.revenue.toLocaleString("vi-VN")}</div>
+                    <div class="stats-bar" style="height:${height}px"
+                         title="Tháng ${item.month}: ${item.revenue} triệu đồng"></div>
+                    <div class="stats-month">T${item.month}</div>
+                </div>`;
+        }).join("");
+
+        const totalInvoices = paidCount + unpaidCount;
+        const paidPercent = totalInvoices
+            ? Math.round(paidCount / totalInvoices * 100)
+            : 0;
+        const unpaidPercent = totalInvoices
+            ? Math.round((unpaidCount - overdueCount) / totalInvoices * 100)
+            : 0;
+        const overduePercent = totalInvoices
+            ? Math.round(overdueCount / totalInvoices * 100)
+            : 0;
+
+        document.getElementById("statsInvoiceStatus").innerHTML = `
+            <div class="stats-status-row">
+                <div class="stats-status-heading">
+                    <span>Đã thanh toán</span><strong>${paidPercent}%</strong>
+                </div>
+                <div class="stats-status-track">
+                    <div class="stats-status-fill stats-status-paid"
+                         style="width:${paidPercent}%"></div>
+                </div>
+            </div>
+            <div class="stats-status-row">
+                <div class="stats-status-heading">
+                    <span>Chưa thanh toán</span><strong>${unpaidPercent}%</strong>
+                </div>
+                <div class="stats-status-track">
+                    <div class="stats-status-fill stats-status-unpaid"
+                         style="width:${unpaidPercent}%"></div>
+                </div>
+            </div>
+            <div class="stats-status-row">
+                <div class="stats-status-heading">
+                    <span>Quá hạn</span><strong>${overduePercent}%</strong>
+                </div>
+                <div class="stats-status-track">
+                    <div class="stats-status-fill stats-status-overdue"
+                         style="width:${overduePercent}%"></div>
+                </div>
+            </div>
+            <p style="color:#64748b;font-size:12px;margin-top:18px">
+                Tổng số hóa đơn mẫu: ${totalInvoices}
+            </p>`;
+
+        const recentMonths = months.filter(item => item.revenue > 0).slice(-5).reverse();
+
+        document.getElementById("statsRecentTable").innerHTML =
+            recentMonths.length
+                ? recentMonths.map(item => `
+                    <tr>
+                        <td>Tháng ${item.month}</td>
+                        <td>${item.paid}</td>
+                        <td><strong>${formatStatsMoney(item.revenue)}</strong></td>
+                    </tr>`).join("")
+                : '<tr><td colspan="3" class="stats-empty">Chưa có dữ liệu mẫu.</td></tr>';
+    }
+
+    renderStatistics();
+</script>

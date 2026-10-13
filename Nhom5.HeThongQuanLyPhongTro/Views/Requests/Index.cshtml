@@ -1,0 +1,257 @@
+
+@{
+    ViewData["Title"] = "Yêu cầu / Sự cố";
+}
+
+<style>
+    .request-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .request-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .request-description {
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .request-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .request-table td {
+        vertical-align: middle;
+        font-size: 14px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-processing {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-completed {
+        background: #dcfce7;
+        color: #166534;
+    }
+</style>
+
+<div class="request-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <div class="request-title">Quản lý yêu cầu / sự cố</div>
+            <div class="request-description">
+                Theo dõi phản ánh và tình trạng xử lý của người thuê.
+            </div>
+        </div>
+
+        <button class="btn btn-primary" type="button"
+                data-bs-toggle="modal" data-bs-target="#addRequestModal">
+            + Thêm yêu cầu
+        </button>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <input id="searchRequest" class="form-control"
+                   placeholder="Tìm theo mã, phòng hoặc nội dung..." />
+        </div>
+        <div class="col-md-3">
+            <select id="filterStatus" class="form-select">
+                <option value="">Tất cả trạng thái</option>
+                <option value="Chờ xử lý">Chờ xử lý</option>
+                <option value="Đang xử lý">Đang xử lý</option>
+                <option value="Đã hoàn thành">Đã hoàn thành</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover request-table">
+            <thead>
+                <tr>
+                    <th>Mã yêu cầu</th>
+                    <th>Phòng</th>
+                    <th>Nội dung</th>
+                    <th>Ngày gửi</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody id="requestTableBody">
+                <tr>
+                    <td>YC001</td>
+                    <td>P101</td>
+                    <td>Vòi nước trong phòng bị rò rỉ</td>
+                    <td>05/10/2026</td>
+                    <td><span class="status-badge status-pending">Chờ xử lý</span></td>
+                </tr>
+                <tr>
+                    <td>YC002</td>
+                    <td>P102</td>
+                    <td>Đèn phòng bị hỏng</td>
+                    <td>07/10/2026</td>
+                    <td><span class="status-badge status-processing">Đang xử lý</span></td>
+                </tr>
+                <tr>
+                    <td>YC003</td>
+                    <td>P201</td>
+                    <td>Đã kiểm tra và sửa khóa cửa</td>
+                    <td>09/10/2026</td>
+                    <td><span class="status-badge status-completed">Đã hoàn thành</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="emptyMessage" class="text-center text-secondary py-4" hidden>
+            Không tìm thấy yêu cầu phù hợp.
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addRequestModal" tabindex="-1"
+     aria-labelledby="addRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addRequestForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addRequestModalLabel">
+                        Thêm yêu cầu / sự cố
+                    </h5>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="requestRoom" class="form-label">Phòng</label>
+                        <select id="requestRoom" class="form-select" required>
+                            <option value="">-- Chọn phòng --</option>
+                            <option>P101</option>
+                            <option>P102</option>
+                            <option>P201</option>
+                            <option>P202</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="requestContent" class="form-label">Nội dung sự cố</label>
+                        <textarea id="requestContent" class="form-control"
+                                  rows="3" maxlength="300" required
+                                  placeholder="Mô tả yêu cầu hoặc sự cố..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="requestDate" class="form-label">Ngày gửi</label>
+                        <input id="requestDate" type="date"
+                               class="form-control" required />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light"
+                            data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        Thêm yêu cầu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const searchRequest = document.getElementById('searchRequest');
+        const filterStatus = document.getElementById('filterStatus');
+        const requestTableBody = document.getElementById('requestTableBody');
+        const emptyMessage = document.getElementById('emptyMessage');
+
+        function filterRequests() {
+            const keyword = searchRequest.value.trim().toLowerCase();
+            const status = filterStatus.value;
+            let visibleCount = 0;
+
+            Array.from(requestTableBody.rows).forEach(row => {
+                const text = row.innerText.toLowerCase();
+                const rowStatus = row.cells[4].innerText.trim();
+
+                const matchesKeyword = text.includes(keyword);
+                const matchesStatus = !status || rowStatus === status;
+                const visible = matchesKeyword && matchesStatus;
+
+                row.hidden = !visible;
+                if (visible) visibleCount++;
+            });
+
+            emptyMessage.hidden = visibleCount !== 0;
+        }
+
+        searchRequest.addEventListener('input', filterRequests);
+        filterStatus.addEventListener('change', filterRequests);
+
+        document.getElementById('addRequestForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const room = document.getElementById('requestRoom').value;
+            const content = document.getElementById('requestContent').value.trim();
+            const dateValue = document.getElementById('requestDate').value;
+
+            if (!room || !content || !dateValue) {
+                alert('B vui lòng nhập đầy đủ thông tin.');
+                return;
+            }
+
+            const date = new Date(dateValue + 'T00:00:00');
+            const formattedDate = date.toLocaleDateString('vi-VN');
+            const nextNumber = requestTableBody.rows.length + 1;
+            const code = 'YC' + String(nextNumber).padStart(3, '0');
+
+            const row = requestTableBody.insertRow();
+            row.innerHTML = `
+                <td>${code}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><span class="status-badge status-pending">Chờ xử lý</span></td>
+            `;
+
+            row.cells[1].textContent = room;
+            row.cells[2].textContent = content;
+            row.cells[3].textContent = formattedDate;
+
+            document.getElementById('addRequestForm').reset();
+            bootstrap.Modal.getOrCreateInstance(
+                document.getElementById('addRequestModal')
+            ).hide();
+
+            filterRequests();
+            alert('Đã thêm yêu cầu vào danh sách mẫu.');
+        });
+
+        document.getElementById('requestDate').value =
+            new Date().toLocaleDateString('en-CA');
+    </script>
+}

@@ -1,0 +1,562 @@
+
+@{
+    ViewData["Title"] = "Quản lý người thuê";
+}
+
+<style>
+    .tenant-page {
+        padding: 24px;
+        color: #172554;
+    }
+
+    .tenant-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .tenant-heading h2 {
+        font-size: 26px;
+        font-weight: 800;
+        margin: 0 0 6px;
+    }
+
+    .tenant-heading p {
+        color: #64748b;
+        margin: 0;
+    }
+
+    .tenant-panel {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    }
+
+    .tenant-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .tenant-toolbar input,
+    .tenant-toolbar select {
+        min-height: 42px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 8px 12px;
+        outline: none;
+    }
+
+    .tenant-search {
+        flex: 1;
+        min-width: 220px;
+    }
+
+    .tenant-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .tenant-table th {
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 13px;
+        text-align: left;
+        padding: 14px 12px;
+        white-space: nowrap;
+    }
+
+    .tenant-table td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .tenant-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .tenant-status {
+        display: inline-block;
+        border-radius: 20px;
+        padding: 5px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .status-active {
+        color: #166534;
+        background: #dcfce7;
+    }
+
+    .status-inactive {
+        color: #92400e;
+        background: #fef3c7;
+    }
+
+    .tenant-btn {
+        border: 0;
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .tenant-btn-primary {
+        color: #fff;
+        background: #2563eb;
+    }
+
+    .tenant-btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+    .tenant-btn-light {
+        color: #334155;
+        background: #e2e8f0;
+    }
+
+    .tenant-action {
+        border: 0;
+        background: transparent;
+        color: #2563eb;
+        font-weight: 700;
+        cursor: pointer;
+        margin-right: 8px;
+    }
+
+    .tenant-action.delete {
+        color: #dc2626;
+    }
+
+    .tenant-empty {
+        text-align: center;
+        padding: 28px !important;
+        color: #64748b;
+    }
+
+    .tenant-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        background: rgba(15, 23, 42, 0.55);
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    .tenant-modal.open {
+        display: flex;
+    }
+
+    .tenant-modal-content {
+        width: 100%;
+        max-width: 560px;
+        max-height: 90vh;
+        overflow-y: auto;
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+    }
+
+    .tenant-modal-content h3 {
+        font-weight: 800;
+        margin: 0 0 20px;
+    }
+
+    .tenant-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .tenant-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .tenant-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .tenant-field label {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .tenant-field input,
+    .tenant-field select,
+    .tenant-field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+    }
+
+    .tenant-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 22px;
+    }
+
+    @@media (max-width: 768px) {
+        .tenant-page {
+            padding: 14px;
+        }
+
+        .tenant-panel {
+            padding: 12px;
+        }
+
+        .tenant-table-wrap {
+            overflow-x: auto;
+        }
+
+        .tenant-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .tenant-field.full {
+            grid-column: auto;
+        }
+    }
+</style>
+
+<div class="tenant-page">
+    <div class="tenant-heading">
+        <div>
+            <h2>Quản lý người thuê</h2>
+            <p>Quản lý thông tin người thuê phòng trọ</p>
+        </div>
+
+        <button class="tenant-btn tenant-btn-primary"
+                type="button"
+                onclick="openTenantModal()">
+            + Thêm người thuê
+        </button>
+    </div>
+
+    <div class="tenant-panel">
+        <div class="tenant-toolbar">
+            <input id="tenantSearch"
+                   class="tenant-search"
+                   type="search"
+                   placeholder="Tìm theo tên, mã hoặc số điện thoại..."
+                   oninput="filterTenants()" />
+
+            <select id="tenantStatusFilter" onchange="filterTenants()">
+                <option value="">Tất cả trạng thái</option>
+                <option value="Đang thuê">Đang thuê</option>
+                <option value="Đã rời đi">Đã rời đi</option>
+            </select>
+        </div>
+
+        <div class="tenant-table-wrap">
+            <table class="tenant-table">
+                <thead>
+                    <tr>
+                        <th>Mã người thuê</th>
+                        <th>Họ và tên</th>
+                        <th>Số điện thoại</th>
+                        <th>Email</th>
+                        <th>Phòng</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="tenantTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="tenantModal" class="tenant-modal">
+    <div class="tenant-modal-content">
+        <h3 id="tenantModalTitle">Thêm người thuê</h3>
+
+        <form id="tenantForm">
+            <div class="tenant-form-grid">
+                <div class="tenant-field">
+                    <label for="tenantCode">Mã người thuê *</label>
+                    <input id="tenantCode" required maxlength="20"
+                           placeholder="VD: NT005" />
+                </div>
+
+                <div class="tenant-field">
+                    <label for="tenantName">Họ và tên *</label>
+                    <input id="tenantName" required maxlength="100"
+                           placeholder="Nhập họ và tên" />
+                </div>
+
+                <div class="tenant-field">
+                    <label for="tenantPhone">Số điện thoại *</label>
+                    <input id="tenantPhone" required type="tel"
+                           maxlength="15" pattern="[0-9+ ]{9,15}"
+                           placeholder="Nhập số điện thoại" />
+                </div>
+
+                <div class="tenant-field">
+                    <label for="tenantEmail">Email</label>
+                    <input id="tenantEmail" type="email" maxlength="100"
+                           placeholder="example@email.com" />
+                </div>
+
+                <div class="tenant-field">
+                    <label for="tenantRoom">Phòng</label>
+                    <input id="tenantRoom" maxlength="20"
+                           placeholder="VD: P301" />
+                </div>
+
+                <div class="tenant-field">
+                    <label for="tenantStatus">Trạng thái</label>
+                    <select id="tenantStatus">
+                        <option value="Đang thuê">Đang thuê</option>
+                        <option value="Đã rời đi">Đã rời đi</option>
+                    </select>
+                </div>
+
+                <div class="tenant-field full">
+                    <label for="tenantAddress">Địa chỉ thường trú</label>
+                    <textarea id="tenantAddress" rows="2"
+                              maxlength="250"
+                              placeholder="Nhập địa chỉ"></textarea>
+                </div>
+            </div>
+
+            <div class="tenant-modal-actions">
+                <button type="button"
+                        class="tenant-btn tenant-btn-light"
+                        onclick="closeTenantModal()">
+                    Hủy
+                </button>
+
+                <button type="submit"
+                        class="tenant-btn tenant-btn-primary">
+                    Lưu thông tin
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Dữ liệu mẫu để hoàn thiện giao diện trước khi có Backend.
+    let tenants = [
+        {
+            code: "NT001",
+            name: "Nguyễn Văn An",
+            phone: "0912345678",
+            email: "an@example.com",
+            room: "P101",
+            status: "Đang thuê",
+            address: ""
+        },
+        {
+            code: "NT002",
+            name: "Trần Thị Bình",
+            phone: "0923456789",
+            email: "binh@example.com",
+            room: "P201",
+            status: "Đang thuê",
+            address: ""
+        },
+        {
+            code: "NT003",
+            name: "Lê Văn Cường",
+            phone: "0934567890",
+            email: "cuong@example.com",
+            room: "P102",
+            status: "Đã rời đi",
+            address: ""
+        }
+    ];
+
+    let editingTenantCode = null;
+
+    function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, function (char) {
+            return {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            }[char];
+        });
+    }
+
+    function renderTenants() {
+        const tbody = document.getElementById("tenantTableBody");
+
+        if (!tbody) return;
+
+        if (tenants.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="7" class="tenant-empty">Chưa có dữ liệu người thuê</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = tenants.map(function (tenant) {
+            const statusClass = tenant.status === "Đang thuê"
+                ? "status-active"
+                : "status-inactive";
+
+            return `
+                <tr>
+                    <td><strong>${escapeHtml(tenant.code)}</strong></td>
+                    <td>${escapeHtml(tenant.name)}</td>
+                    <td>${escapeHtml(tenant.phone)}</td>
+                    <td>${escapeHtml(tenant.email || "—")}</td>
+                    <td>${escapeHtml(tenant.room || "—")}</td>
+                    <td>
+                        <span class="tenant-status ${statusClass}">
+                            ${escapeHtml(tenant.status)}
+                        </span>
+                    </td>
+                    <td>
+                        <button type="button" class="tenant-action"
+                            onclick="editTenant('${escapeHtml(tenant.code)}')">
+                            Sửa
+                        </button>
+                        <button type="button" class="tenant-action delete"
+                            onclick="deleteTenant('${escapeHtml(tenant.code)}')">
+                            Xóa
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+
+        filterTenants();
+    }
+
+    function filterTenants() {
+        const keyword = document.getElementById("tenantSearch")
+            .value.trim().toLocaleLowerCase("vi");
+
+        const status = document.getElementById("tenantStatusFilter").value;
+
+        document.querySelectorAll("#tenantTableBody tr").forEach(function (row) {
+            const text = row.textContent.toLocaleLowerCase("vi");
+            const matchesKeyword = text.includes(keyword);
+            const matchesStatus = !status ||
+                row.querySelector(".tenant-status")?.textContent.trim() === status;
+
+            row.style.display = matchesKeyword && matchesStatus ? "" : "none";
+        });
+    }
+
+    function openTenantModal() {
+        editingTenantCode = null;
+        document.getElementById("tenantForm").reset();
+        document.getElementById("tenantCode").disabled = false;
+        document.getElementById("tenantModalTitle").textContent = "Thêm người thuê";
+        document.getElementById("tenantModal").classList.add("open");
+    }
+
+    function closeTenantModal() {
+        document.getElementById("tenantModal").classList.remove("open");
+    }
+
+    function editTenant(code) {
+        const tenant = tenants.find(function (item) {
+            return item.code === code;
+        });
+
+        if (!tenant) return;
+
+        editingTenantCode = code;
+        document.getElementById("tenantModalTitle").textContent = "Sửa thông tin người thuê";
+        document.getElementById("tenantCode").value = tenant.code;
+        document.getElementById("tenantCode").disabled = true;
+        document.getElementById("tenantName").value = tenant.name;
+        document.getElementById("tenantPhone").value = tenant.phone;
+        document.getElementById("tenantEmail").value = tenant.email;
+        document.getElementById("tenantRoom").value = tenant.room;
+        document.getElementById("tenantStatus").value = tenant.status;
+        document.getElementById("tenantAddress").value = tenant.address || "";
+        document.getElementById("tenantModal").classList.add("open");
+    }
+
+    function deleteTenant(code) {
+        const tenant = tenants.find(function (item) {
+            return item.code === code;
+        });
+
+        if (!tenant) return;
+
+        if (!confirm("Bạn có chắc muốn xóa người thuê " + tenant.name + "?")) {
+            return;
+        }
+
+        tenants = tenants.filter(function (item) {
+            return item.code !== code;
+        });
+
+        renderTenants();
+    }
+
+    document.getElementById("tenantForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const tenant = {
+            code: document.getElementById("tenantCode").value.trim(),
+            name: document.getElementById("tenantName").value.trim(),
+            phone: document.getElementById("tenantPhone").value.trim(),
+            email: document.getElementById("tenantEmail").value.trim(),
+            room: document.getElementById("tenantRoom").value.trim(),
+            status: document.getElementById("tenantStatus").value,
+            address: document.getElementById("tenantAddress").value.trim()
+        };
+
+        if (!tenant.code || !tenant.name || !tenant.phone) {
+            alert("Vui lòng nhập mã, họ tên và số điện thoại.");
+            return;
+        }
+
+        const duplicate = tenants.some(function (item) {
+            return item.code.toLowerCase() === tenant.code.toLowerCase()
+                && item.code !== editingTenantCode;
+        });
+
+        if (duplicate) {
+            alert("Mã người thuê đã tồn tại. Vui lòng nhập mã khác.");
+            return;
+        }
+
+        if (editingTenantCode) {
+            const index = tenants.findIndex(function (item) {
+                return item.code === editingTenantCode;
+            });
+
+            if (index !== -1) {
+                tenants[index] = tenant;
+            }
+        } else {
+            tenants.push(tenant);
+        }
+
+        closeTenantModal();
+        renderTenants();
+    });
+
+    document.getElementById("tenantModal").addEventListener("click", function (event) {
+        if (event.target === this) {
+            closeTenantModal();
+        }
+    });
+
+    renderTenants();
+</script>
