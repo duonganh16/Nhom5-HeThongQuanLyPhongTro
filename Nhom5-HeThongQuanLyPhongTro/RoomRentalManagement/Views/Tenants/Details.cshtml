@@ -1,0 +1,30 @@
+@model RoomRentalManagement.Models.Tenant
+
+@{
+    ViewData["Title"] = "Chi tiết người thuê";
+}
+
+<h1>Chi tiết người thuê</h1>
+<hr />
+<dl class="row">
+    <dt class="col-sm-3">Mã người thuê</dt>
+    <dd class="col-sm-9">@Model.TenantID</dd>
+
+    <dt class="col-sm-3">Họ và tên</dt>
+    <dd class="col-sm-9">@Model.FullName</dd>
+
+    <dt class="col-sm-3">Số điện thoại</dt>
+    <dd class="col-sm-9">@Model.Phone</dd>
+
+    <dt class="col-sm-3">Số CCCD</dt>
+    <dd class="col-sm-9">@Model.CCCD</dd>
+
+    <dt class="col-sm-3">Ngày sinh</dt>
+    <dd class="col-sm-9">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</dd>
+
+    <dt class="col-sm-3">Địa chỉ</dt>
+    <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Address) ? "Chưa cập nhật" : Model.Address)</dd>
+</dl>
+
+<a asp-action="Edit" asp-route-id="@Model.TenantID" class="btn btn-primary">Sửa</a>
+<a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>

@@ -1,0 +1,31 @@
+@model RoomRentalManagement.Models.Request
+
+@{
+    ViewData["Title"] = "Xóa yêu cầu";
+}
+
+<h1 class="h2">Xóa yêu cầu</h1>
+<div class="alert alert-warning">
+    Bạn có chắc chắn muốn xóa yêu cầu #@Model.RequestID không? Thao tác này không thể hoàn tác.
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Người thuê</dt>
+    <dd class="col-sm-9">Người thuê #@Model.TenantID</dd>
+
+    <dt class="col-sm-3">Nội dung</dt>
+    <dd class="col-sm-9 text-break">@Model.Content</dd>
+
+    <dt class="col-sm-3">Ngày tạo</dt>
+    <dd class="col-sm-9">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</dd>
+
+    <dt class="col-sm-3">Trạng thái</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+</dl>
+
+<form asp-action="Delete" asp-route-id="@Model.RequestID" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="RequestID" />
+    <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+    <a asp-action="Index" class="btn btn-secondary ms-1">Hủy</a>
+</form>

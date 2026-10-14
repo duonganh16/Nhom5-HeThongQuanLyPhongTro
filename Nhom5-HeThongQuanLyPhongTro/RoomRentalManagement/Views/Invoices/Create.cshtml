@@ -1,0 +1,138 @@
+@model RoomRentalManagement.Models.Invoice
+@using RoomRentalManagement.Models
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Tạo hóa đơn";
+    var contracts = ViewBag.Contracts as IEnumerable<Contract> ?? Enumerable.Empty<Contract>();
+}
+
+<h1>Tạo hóa đơn</h1>
+<hr />
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="row">
+        <div class="col-md-7">
+            <div class="mb-3">
+                <label asp-for="ContractID" class="form-label">Hợp đồng</label>
+                <select asp-for="ContractID" class="form-select" id="ContractID">
+                    <option value="">-- Chọn hợp đồng --</option>
+                    @foreach (var contract in contracts)
+                    {
+                        <option value="@contract.ContractID"
+                                data-rent-price="@contract.RentPrice.ToString(CultureInfo.InvariantCulture)"
+                                selected="@(Model.ContractID == contract.ContractID ? "selected" : null)">
+                            HĐ #@contract.ContractID - @(contract.Room?.RoomName ?? "Chưa có phòng") - @(contract.Tenant?.FullName ?? "Chưa có người thuê")
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="ContractID" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="BillingMonth" class="form-label">Tháng hóa đơn</label>
+                <input asp-for="BillingMonth" type="date" class="form-control" />
+                <span asp-validation-for="BillingMonth" class="text-danger"></span>
+                <small class="text-muted">Hệ thống lưu hóa đơn theo tháng, dùng ngày 1 làm mốc tháng.</small>
+            </div>
+        </div>
+    </div>
+
+    <h4>Chỉ số điện</h4>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="ElectricOld" class="form-label">Chỉ số điện cũ</label>
+            <input asp-for="ElectricOld" type="number" min="0" step="0.01" class="form-control" />
+            <span asp-validation-for="ElectricOld" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="ElectricNew" class="form-label">Chỉ số điện mới</label>
+            <input asp-for="ElectricNew" type="number" min="0" step="0.01" class="form-control" />
+            <span asp-validation-for="ElectricNew" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="ElectricPrice" class="form-label">Đơn giá điện</label>
+            <input asp-for="ElectricPrice" type="number" min="0" step="0.01" class="form-control" />
+            <span asp-validation-for="ElectricPrice" class="text-danger"></span>
+        </div>
+    </div>
+
+    <h4>Chỉ số nước</h4>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="WaterOld" class="form-label">Chỉ số nước cũ</label>
+            <input asp-for="WaterOld" type="number" min="0" step="0.01" class="form-control" />
+            <span asp-validation-for="WaterOld" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="WaterNew" class="form-label">Chỉ số nước mới</label>
+            <input asp-for="WaterNew" type="number" min="0" step="0.01" class="form-control" />
+            <span asp-validation-for="WaterNew" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="WaterPrice" class="form-label">Đơn giá nước</label>
+            <input asp-for="WaterPrice" type="number" min="0" step="0.01" class="form-control" />
+            <span asp-validation-for="WaterPrice" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="RentAmount" class="form-label">Tiền thuê</label>
+            <input asp-for="RentAmount" id="RentAmount" type="number" class="form-control" readonly />
+            <small class="text-muted">Tự động lấy từ giá thuê trong hợp đồng đã chọn.</small>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="ServiceFee" class="form-label">Phí dịch vụ</label>
+            <input asp-for="ServiceFee" type="number" min="0" step="0.01" class="form-control" />
+            <span asp-validation-for="ServiceFee" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="Total" class="form-label">Tổng tiền dự kiến</label>
+            <input asp-for="Total" id="Total" type="number" class="form-control" readonly />
+            <small class="text-muted">Tổng tiền được tính lại ở máy chủ khi lưu.</small>
+        </div>
+    </div>
+
+    <div class="mb-3 col-md-4">
+        <label asp-for="Status" class="form-label">Trạng thái</label>
+        <select asp-for="Status" class="form-select">
+            <option value="Unpaid">Chưa thanh toán</option>
+            <option value="Paid">Đã thanh toán</option>
+            <option value="Overdue">Quá hạn</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu hóa đơn</button>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const contractSelect = document.getElementById('ContractID');
+            const rentInput = document.getElementById('RentAmount');
+            const totalInput = document.getElementById('Total');
+            const fieldIds = ['ElectricOld', 'ElectricNew', 'ElectricPrice', 'WaterOld', 'WaterNew', 'WaterPrice', 'ServiceFee'];
+            const number = id => {
+                const value = Number.parseFloat(document.getElementById(id)?.value ?? '0');
+                return Number.isFinite(value) ? value : 0;
+            };
+            function recalculate() {
+                const option = contractSelect.options[contractSelect.selectedIndex];
+                const rent = Number.parseFloat(option?.dataset.rentPrice ?? '0') || 0;
+                rentInput.value = rent.toFixed(2);
+                const electric = (number('ElectricNew') - number('ElectricOld')) * number('ElectricPrice');
+                const water = (number('WaterNew') - number('WaterOld')) * number('WaterPrice');
+                totalInput.value = (electric + water + rent + number('ServiceFee')).toFixed(2);
+            }
+            contractSelect.addEventListener('change', recalculate);
+            fieldIds.forEach(id => document.getElementById(id)?.addEventListener('input', recalculate));
+            recalculate();
+        })();
+    </script>
+}

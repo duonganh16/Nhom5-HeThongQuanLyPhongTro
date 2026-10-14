@@ -1,0 +1,33 @@
+@model RoomRentalManagement.Models.Payment
+
+@{
+    ViewData["Title"] = "Xóa thanh toán";
+}
+
+<h1>Xóa giao dịch thanh toán</h1>
+<div class="alert alert-warning">
+    Bạn có chắc chắn muốn xóa giao dịch thanh toán #@Model.PaymentID không? Việc xóa sẽ cập nhật lại trạng thái hóa đơn liên quan.
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Hóa đơn</dt>
+    <dd class="col-sm-9">#@Model.InvoiceID - @(Model.Invoice?.BillingMonth.ToString("MM/yyyy") ?? "Không có thông tin")</dd>
+
+    <dt class="col-sm-3">Người thuê</dt>
+    <dd class="col-sm-9">@(Model.Invoice?.Contract?.Tenant?.FullName ?? "—")</dd>
+
+    <dt class="col-sm-3">Ngày thanh toán</dt>
+    <dd class="col-sm-9">@Model.PaymentDate.ToString("dd/MM/yyyy")</dd>
+
+    <dt class="col-sm-3">Số tiền</dt>
+    <dd class="col-sm-9">@Model.Amount.ToString("N2") đ</dd>
+
+    <dt class="col-sm-3">Phương thức</dt>
+    <dd class="col-sm-9">@Model.PaymentMethod</dd>
+</dl>
+
+<form asp-action="Delete" asp-route-id="@Model.PaymentID" method="post">
+    <input type="hidden" asp-for="PaymentID" />
+    <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>

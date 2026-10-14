@@ -1,0 +1,15 @@
+# Visual Studio
+.vs/
+**/.vs/
+*.suo
+*.user
+
+# Build files
+[Bb]in/
+[Oo]bj/
+**/bin/
+**/obj/
+
+# IDE
+.vscode/
+.idea/

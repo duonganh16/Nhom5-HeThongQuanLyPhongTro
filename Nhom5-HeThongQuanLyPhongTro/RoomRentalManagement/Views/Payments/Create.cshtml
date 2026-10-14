@@ -1,0 +1,71 @@
+@model RoomRentalManagement.Models.Payment
+@using RoomRentalManagement.Models
+
+@{
+    ViewData["Title"] = "Ghi nhận thanh toán";
+    var invoices = ViewBag.Invoices as IEnumerable<Invoice> ?? Enumerable.Empty<Invoice>();
+    var methods = ViewBag.PaymentMethods as IEnumerable<string> ?? new[] { "Tiền mặt", "Chuyển khoản", "Ví điện tử", "Khác" };
+}
+
+<h1>Ghi nhận thanh toán</h1>
+<hr />
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="mb-3">
+                <label asp-for="InvoiceID" class="form-label">Hóa đơn</label>
+                <select asp-for="InvoiceID" class="form-select">
+                    <option value="">-- Chọn hóa đơn --</option>
+                    @foreach (var invoice in invoices)
+                    {
+                        <option value="@invoice.InvoiceID" selected="@(Model.InvoiceID == invoice.InvoiceID ? "selected" : null)">
+                            HĐ #@invoice.InvoiceID - @invoice.BillingMonth.ToString("MM/yyyy") - @(invoice.Contract?.Room?.RoomName ?? "Chưa có phòng") - @(invoice.Contract?.Tenant?.FullName ?? "Chưa có người thuê") - Tổng: @invoice.Total.ToString("N0") đ (@(invoice.Status == "Paid" ? "Đã thanh toán" : invoice.Status == "Overdue" ? "Quá hạn" : "Chưa thanh toán"))
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="InvoiceID" class="text-danger"></span>
+                <small class="form-text text-muted">Có thể ghi nhận nhiều lần thanh toán cho một hóa đơn, nhưng tổng các lần thanh toán không được vượt tổng hóa đơn.</small>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PaymentDate" class="form-label">Ngày thanh toán</label>
+                <input asp-for="PaymentDate" type="date" class="form-control" value="@Model.PaymentDate.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="PaymentDate" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Amount" class="form-label">Số tiền thanh toán (VNĐ)</label>
+                <input asp-for="Amount" type="number" min="0.01" step="0.01" class="form-control" />
+                <span asp-validation-for="Amount" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PaymentMethod" class="form-label">Phương thức thanh toán</label>
+                <select asp-for="PaymentMethod" class="form-select">
+                    <option value="">-- Chọn phương thức --</option>
+                    @foreach (var method in methods)
+                    {
+                        <option value="@method" selected="@(Model.PaymentMethod == method ? "selected" : null)">@method</option>
+                    }
+                </select>
+                <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Note" class="form-label">Ghi chú</label>
+                <textarea asp-for="Note" class="form-control" rows="3" maxlength="500" placeholder="Thông tin bổ sung (không bắt buộc)"></textarea>
+                <span asp-validation-for="Note" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Lưu thanh toán</button>
+            <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

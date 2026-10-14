@@ -1,0 +1,31 @@
+@model RoomRentalManagement.Models.Request
+
+@{
+    ViewData["Title"] = "Chi tiết yêu cầu";
+}
+
+<h1 class="h2">Chi tiết yêu cầu #@Model.RequestID</h1>
+<hr />
+
+<dl class="row">
+    <dt class="col-sm-3">Mã yêu cầu</dt>
+    <dd class="col-sm-9">@Model.RequestID</dd>
+
+    <dt class="col-sm-3">Người thuê</dt>
+    <dd class="col-sm-9">Người thuê #@Model.TenantID</dd>
+
+    <dt class="col-sm-3">Nội dung</dt>
+    <dd class="col-sm-9 text-break">@Model.Content</dd>
+
+    <dt class="col-sm-3">Ngày tạo</dt>
+    <dd class="col-sm-9">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</dd>
+
+    <dt class="col-sm-3">Trạng thái</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+
+    <dt class="col-sm-3">Phản hồi</dt>
+    <dd class="col-sm-9 text-break">@(string.IsNullOrWhiteSpace(Model.Response) ? "Chưa có phản hồi" : Model.Response)</dd>
+</dl>
+
+<a asp-action="Edit" asp-route-id="@Model.RequestID" class="btn btn-primary">Sửa</a>
+<a asp-action="Index" class="btn btn-secondary ms-1">Quay lại danh sách</a>

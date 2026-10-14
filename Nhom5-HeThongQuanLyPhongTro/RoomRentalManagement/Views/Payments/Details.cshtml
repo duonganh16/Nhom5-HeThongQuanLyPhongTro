@@ -1,0 +1,47 @@
+@model RoomRentalManagement.Models.Payment
+
+@{
+    ViewData["Title"] = "Chi tiết thanh toán";
+}
+
+<h1>Chi tiết thanh toán #@Model.PaymentID</h1>
+<hr />
+
+<dl class="row">
+    <dt class="col-sm-3">Mã thanh toán</dt>
+    <dd class="col-sm-9">@Model.PaymentID</dd>
+
+    <dt class="col-sm-3">Hóa đơn</dt>
+    <dd class="col-sm-9">
+        @if (Model.Invoice != null)
+        {
+            <a asp-controller="Invoices" asp-action="Details" asp-route-id="@Model.InvoiceID">Hóa đơn #@Model.InvoiceID</a>
+            <span> - Tháng @Model.Invoice.BillingMonth.ToString("MM/yyyy")</span>
+        }
+        else
+        {
+            <span>#@Model.InvoiceID</span>
+        }
+    </dd>
+
+    <dt class="col-sm-3">Phòng</dt>
+    <dd class="col-sm-9">@(Model.Invoice?.Contract?.Room?.RoomName ?? "—")</dd>
+
+    <dt class="col-sm-3">Người thuê</dt>
+    <dd class="col-sm-9">@(Model.Invoice?.Contract?.Tenant?.FullName ?? "—")</dd>
+
+    <dt class="col-sm-3">Ngày thanh toán</dt>
+    <dd class="col-sm-9">@Model.PaymentDate.ToString("dd/MM/yyyy")</dd>
+
+    <dt class="col-sm-3">Số tiền</dt>
+    <dd class="col-sm-9">@Model.Amount.ToString("N2") đ</dd>
+
+    <dt class="col-sm-3">Phương thức</dt>
+    <dd class="col-sm-9">@Model.PaymentMethod</dd>
+
+    <dt class="col-sm-3">Ghi chú</dt>
+    <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Note) ? "—" : Model.Note)</dd>
+</dl>
+
+<a asp-action="Edit" asp-route-id="@Model.PaymentID" class="btn btn-primary">Sửa</a>
+<a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>

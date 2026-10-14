@@ -1,0 +1,42 @@
+@model RoomRentalManagement.Models.Tenant
+
+@{
+    ViewData["Title"] = "Xóa người thuê";
+}
+
+<h1>Xóa người thuê</h1>
+<hr />
+@if (ViewBag.CanDelete is bool canDelete && !canDelete)
+{
+    <div class="alert alert-warning">
+        Không thể xóa người thuê này vì đã có hợp đồng hoặc yêu cầu liên quan. Bạn nên giữ bản ghi để bảo toàn lịch sử.
+    </div>
+}
+else
+{
+    <div class="alert alert-danger">Bạn có chắc chắn muốn xóa người thuê này không?</div>
+}
+
+<dl class="row">
+    <dt class="col-sm-3">Mã người thuê</dt>
+    <dd class="col-sm-9">@Model.TenantID</dd>
+    <dt class="col-sm-3">Họ và tên</dt>
+    <dd class="col-sm-9">@Model.FullName</dd>
+    <dt class="col-sm-3">Số điện thoại</dt>
+    <dd class="col-sm-9">@Model.Phone</dd>
+    <dt class="col-sm-3">CCCD</dt>
+    <dd class="col-sm-9">@Model.CCCD</dd>
+</dl>
+
+@if (ViewBag.CanDelete is bool canDelete2 && canDelete2)
+{
+    <form asp-action="Delete" asp-route-id="@Model.TenantID" method="post">
+        <input type="hidden" name="id" value="@Model.TenantID" />
+        <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+    </form>
+}
+else
+{
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+}

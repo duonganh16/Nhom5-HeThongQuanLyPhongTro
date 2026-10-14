@@ -1,0 +1,45 @@
+@model RoomRentalManagement.Models.Invoice
+
+@{
+    ViewData["Title"] = "Xóa hóa đơn";
+    var canDelete = ViewBag.CanDelete is bool value && value;
+}
+
+<h1>Xóa hóa đơn</h1>
+<div class="alert alert-warning">
+    Bạn có chắc chắn muốn xóa hóa đơn #@Model.InvoiceID của tháng @Model.BillingMonth.ToString("MM/yyyy") không?
+</div>
+
+@if (!canDelete)
+{
+    <div class="alert alert-danger">
+        Không thể xóa hóa đơn này vì đã có giao dịch thanh toán liên quan. Hãy giữ hóa đơn để bảo toàn lịch sử thanh toán.
+    </div>
+}
+
+<dl class="row">
+    <dt class="col-sm-3">Phòng</dt>
+    <dd class="col-sm-9">@(Model.Contract?.Room?.RoomName ?? "-")</dd>
+
+    <dt class="col-sm-3">Người thuê</dt>
+    <dd class="col-sm-9">@(Model.Contract?.Tenant?.FullName ?? "-")</dd>
+
+    <dt class="col-sm-3">Tổng tiền</dt>
+    <dd class="col-sm-9">@Model.Total.ToString("N0")</dd>
+
+    <dt class="col-sm-3">Trạng thái</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+</dl>
+
+@if (canDelete)
+{
+    <form asp-action="Delete" asp-route-id="@Model.InvoiceID" method="post">
+        <input type="hidden" name="id" value="@Model.InvoiceID" />
+        <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+    </form>
+}
+else
+{
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+}

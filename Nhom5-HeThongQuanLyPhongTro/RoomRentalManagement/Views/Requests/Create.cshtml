@@ -1,0 +1,57 @@
+@model RoomRentalManagement.Models.Request
+
+@{
+    ViewData["Title"] = "Tạo yêu cầu";
+}
+
+<h1 class="h2">Tạo yêu cầu mới</h1>
+<p class="text-muted">Nhập thông tin yêu cầu của người thuê.</p>
+<hr />
+
+<div class="row">
+    <div class="col-md-8 col-lg-7">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="TenantID" class="form-label">Người thuê</label>
+                <select asp-for="TenantID" asp-items="ViewBag.TenantOptions" class="form-select">
+                    <option value="">-- Chọn người thuê --</option>
+                </select>
+                <span asp-validation-for="TenantID" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Content" class="form-label">Nội dung yêu cầu</label>
+                <textarea asp-for="Content" class="form-control" rows="4" maxlength="2000" placeholder="Mô tả vấn đề hoặc yêu cầu..."></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CreatedDate" class="form-label">Ngày tạo</label>
+                <input asp-for="CreatedDate" type="datetime-local" class="form-control" />
+                <span asp-validation-for="CreatedDate" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Status" class="form-label">Trạng thái</label>
+                <select asp-for="Status" asp-items="ViewBag.StatusOptions" class="form-select"></select>
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Response" class="form-label">Phản hồi (nếu có)</label>
+                <textarea asp-for="Response" class="form-control" rows="3" maxlength="2000" placeholder="Nhập phản hồi nếu đã xử lý..."></textarea>
+                <span asp-validation-for="Response" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Lưu yêu cầu</button>
+            <a asp-action="Index" class="btn btn-secondary ms-1">Quay lại</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
