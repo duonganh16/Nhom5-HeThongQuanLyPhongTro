@@ -1,5 +1,22 @@
+
+# Visual Studio
 .vs/
+**/.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+[Bb]in/
+[Oo]bj/
 **/bin/
 **/obj/
-*.user
-*.suo
+
+# IDE
+.vscode/
+.idea/
+
+# Windows
+Thumbs.db
+.DS_Store
