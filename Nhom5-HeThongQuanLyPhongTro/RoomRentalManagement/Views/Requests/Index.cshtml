@@ -2,15 +2,25 @@
 
 @{
     ViewData["Title"] = "Quản lý yêu cầu";
+    var isAdmin = User.IsInRole("Admin");
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <h1 class="h2">Quản lý yêu cầu</h1>
-        <p class="text-muted mb-0">Theo dõi yêu cầu và phản hồi dành cho người thuê.</p>
+        <h1 class="h2">@(isAdmin ? "Quản lý yêu cầu" : "Yêu cầu của tôi")</h1>
+        <p class="text-muted mb-0">@(isAdmin ? "Theo dõi và phản hồi yêu cầu của người thuê." : "Theo dõi trạng thái và phản hồi cho các yêu cầu bạn đã gửi.")</p>
     </div>
     <a asp-action="Create" class="btn btn-primary">+ Tạo yêu cầu</a>
 </div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 
 @if (Model.Any())
 {
@@ -19,7 +29,10 @@
             <thead class="table-light">
                 <tr>
                     <th>Mã yêu cầu</th>
-                    <th>Người thuê</th>
+                    @if (isAdmin)
+                    {
+                        <th>Người thuê</th>
+                    }
                     <th>Nội dung</th>
                     <th>Ngày tạo</th>
                     <th>Trạng thái</th>
@@ -32,7 +45,10 @@
             {
                 <tr>
                     <td>@item.RequestID</td>
-                    <td>Người thuê #@item.TenantID</td>
+                    @if (isAdmin)
+                    {
+                        <td>@(item.Tenant?.FullName ?? $"Người thuê #{item.TenantID}")</td>
+                    }
                     <td class="text-break">@(item.Content.Length > 80 ? item.Content.Substring(0, 80) + "…" : item.Content)</td>
                     <td>@item.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
                     <td>
@@ -56,8 +72,11 @@
                     <td class="text-break">@(string.IsNullOrWhiteSpace(item.Response) ? "Chưa phản hồi" : (item.Response.Length > 60 ? item.Response.Substring(0, 60) + "…" : item.Response))</td>
                     <td class="text-end text-nowrap">
                         <a asp-action="Details" asp-route-id="@item.RequestID" class="btn btn-sm btn-outline-info">Chi tiết</a>
-                        <a asp-action="Edit" asp-route-id="@item.RequestID" class="btn btn-sm btn-outline-primary">Sửa</a>
-                        <a asp-action="Delete" asp-route-id="@item.RequestID" class="btn btn-sm btn-outline-danger">Xóa</a>
+                        @if (isAdmin)
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.RequestID" class="btn btn-sm btn-outline-primary">Sửa</a>
+                            <a asp-action="Delete" asp-route-id="@item.RequestID" class="btn btn-sm btn-outline-danger">Xóa</a>
+                        }
                     </td>
                 </tr>
             }
@@ -67,5 +86,5 @@
 }
 else
 {
-    <div class="alert alert-info">Chưa có yêu cầu nào. Hãy chọn “Tạo yêu cầu” để thêm bản ghi đầu tiên.</div>
+    <div class="alert alert-info">Chưa có yêu cầu nào. Chọn “Tạo yêu cầu” để thêm bản ghi đầu tiên.</div>
 }

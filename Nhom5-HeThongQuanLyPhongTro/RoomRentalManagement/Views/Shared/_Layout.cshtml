@@ -11,24 +11,24 @@
     <link rel="stylesheet"
           href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    <!-- CSS chính của website -->
+    <!-- CSS cua website -->
     <link rel="stylesheet"
           href="~/css/site.css"
           asp-append-version="true" />
 
-    <!-- CSS được sinh bởi ASP.NET Core -->
+    <!-- CSS cua ASP.NET Core -->
     <link rel="stylesheet"
           href="~/RoomRentalManagement.styles.css"
           asp-append-version="true" />
 </head>
 
 <body>
-    <!-- Thanh điều hướng -->
+    <!-- THANH DIEU HUONG -->
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-3">
             <div class="container-fluid">
 
-                <!-- Tên hệ thống -->
+                <!-- Ten he thong -->
                 <a class="navbar-brand fw-bold"
                    asp-area=""
                    asp-controller="Home"
@@ -36,22 +36,22 @@
                     RoomRentalManagement
                 </a>
 
-                <!-- Nút thu gọn menu trên màn hình nhỏ -->
+                <!-- Nut thu gon menu -->
                 <button class="navbar-toggler"
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#mainNavbar"
                         aria-controls="mainNavbar"
                         aria-expanded="false"
-                        aria-label="Mở menu">
+                        aria-label="Mo menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Danh sách chức năng -->
+                <!-- Cac chuc nang -->
                 <div class="collapse navbar-collapse" id="mainNavbar">
                     <ul class="navbar-nav me-auto">
 
-                        <!-- Trang chủ -->
+                        <!-- Trang chu -->
                         <li class="nav-item">
                             <a class="nav-link"
                                asp-area=""
@@ -61,7 +61,7 @@
                             </a>
                         </li>
 
-                        <!-- Quản lý phòng trọ -->
+                        <!-- Phong tro -->
                         <li class="nav-item">
                             <a class="nav-link"
                                asp-area=""
@@ -71,7 +71,7 @@
                             </a>
                         </li>
 
-                        <!-- Quản lý người thuê -->
+                        <!-- Nguoi thue -->
                         <li class="nav-item">
                             <a class="nav-link"
                                asp-area=""
@@ -81,7 +81,7 @@
                             </a>
                         </li>
 
-                        <!-- Quản lý hợp đồng -->
+                        <!-- Hop dong -->
                         <li class="nav-item">
                             <a class="nav-link"
                                asp-area=""
@@ -91,7 +91,7 @@
                             </a>
                         </li>
 
-                        <!-- Quản lý hóa đơn -->
+                        <!-- Hoa don -->
                         <li class="nav-item">
                             <a class="nav-link"
                                asp-area=""
@@ -101,7 +101,7 @@
                             </a>
                         </li>
 
-                        <!-- Quản lý thanh toán -->
+                        <!-- Thanh toan -->
                         <li class="nav-item">
                             <a class="nav-link"
                                asp-area=""
@@ -111,7 +111,7 @@
                             </a>
                         </li>
 
-                        <!-- Quản lý yêu cầu -->
+                        <!-- Yeu cau -->
                         <li class="nav-item">
                             <a class="nav-link"
                                asp-area=""
@@ -121,7 +121,7 @@
                             </a>
                         </li>
 
-                        <!-- Chính sách bảo mật -->
+                        <!-- Privacy -->
                         <li class="nav-item">
                             <a class="nav-link"
                                asp-area=""
@@ -132,19 +132,67 @@
                         </li>
 
                     </ul>
+
+                    <!-- MENU TAI KHOAN -->
+                    <ul class="navbar-nav ms-auto">
+
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link">
+                                    Xin chào, @User.Identity.Name
+                                    (@User.FindFirst(
+                                        System.Security.Claims.ClaimTypes.Role
+                                    )?.Value)
+                                </span>
+                            </li>
+
+                            <li class="nav-item">
+                                <form asp-controller="Account"
+                                      asp-action="Logout"
+                                      method="post"
+                                      class="d-inline">
+
+                                    <button type="submit"
+                                            class="nav-link btn btn-link">
+                                        Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Account"
+                                   asp-action="Login">
+                                    Đăng nhập
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Account"
+                                   asp-action="Register">
+                                    Đăng ký
+                                </a>
+                            </li>
+                        }
+
+                    </ul>
                 </div>
             </div>
         </nav>
     </header>
 
-    <!-- Nội dung của từng trang -->
+    <!-- NOI DUNG CAC TRANG -->
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <!-- Chân trang -->
+    <!-- CHAN TRANG -->
     <footer class="border-top footer text-muted mt-4 py-3">
         <div class="container">
             &copy; @DateTime.Now.Year - RoomRentalManagement
@@ -157,7 +205,7 @@
         </div>
     </footer>
 
-    <!-- JavaScript -->
+    <!-- JAVASCRIPT -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -165,8 +213,6 @@
     <script src="~/js/site.js"
             asp-append-version="true"></script>
 
-    <!-- Cho phép từng trang thêm JavaScript riêng -->
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-```

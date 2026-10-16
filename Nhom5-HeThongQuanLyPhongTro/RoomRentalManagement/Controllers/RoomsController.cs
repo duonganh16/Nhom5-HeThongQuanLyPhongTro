@@ -1,150 +1,148 @@
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RoomRentalManagement.Models;
 using RoomRentalManagement.Data;
+using RoomRentalManagement.Models;
 
-public class RoomsController : Controller
+namespace RoomRentalManagement.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public RoomsController(ApplicationDbContext context)
+    [Authorize(Roles = "Admin")]
+    public class RoomsController : Controller
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
 
-    // GET: ROOMS
-    public async Task<IActionResult> Index()    
-    {
-        return View(await _context.Rooms.ToListAsync());
-    }
-
-    // GET: ROOMS/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
+        public RoomsController(ApplicationDbContext context)
         {
-            return NotFound();
+            _context = context;
         }
 
-        var room = await _context.Rooms
-            .FirstOrDefaultAsync(m => m.RoomID == id);
-        if (room == null)
+        // GET: /Rooms
+        public async Task<IActionResult> Index()
         {
-            return NotFound();
+            var rooms = await _context.Rooms
+                .AsNoTracking()
+                .OrderBy(r => r.RoomName)
+                .ToListAsync();
+
+            return View(rooms);
         }
 
-        return View(room);
-    }
-
-    // GET: ROOMS/Create
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    // POST: ROOMS/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("RoomID,RoomName,Price,Area,Status,Description")] Room room)
-    {
-        if (ModelState.IsValid)
+        // GET: /Rooms/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            _context.Add(room);
+            if (id == null) return NotFound();
+
+            var room = await _context.Rooms
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.RoomID == id.Value);
+
+            if (room == null) return NotFound();
+            return View(room);
+        }
+
+        // GET: /Rooms/Create
+        public IActionResult Create() => View();
+
+        // POST: /Rooms/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(
+            [Bind("RoomName,Price,Area,Status,Description")] Room room)
+        {
+            ValidateRoom(room);
+            if (!ModelState.IsValid) return View(room);
+
+            room.RoomName = room.RoomName.Trim();
+            room.Status = string.IsNullOrWhiteSpace(room.Status) ? "Available" : room.Status.Trim();
+            room.Description = string.IsNullOrWhiteSpace(room.Description) ? null : room.Description.Trim();
+
+            _context.Rooms.Add(room);
             await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Thêm phòng trọ thành công.";
             return RedirectToAction(nameof(Index));
         }
-        return View(room);
-    }
 
-    // GET: ROOMS/Edit/5
-    public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null)
+        // GET: /Rooms/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
-            return NotFound();
+            if (id == null) return NotFound();
+            var room = await _context.Rooms.FindAsync(id.Value);
+            if (room == null) return NotFound();
+            return View(room);
         }
 
-        var room = await _context.Rooms.FindAsync(id);
-        if (room == null)
+        // POST: /Rooms/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("RoomID,RoomName,Price,Area,Status,Description")] Room input)
         {
-            return NotFound();
-        }
-        return View(room);
-    }
+            if (id != input.RoomID) return NotFound();
 
-    // POST: ROOMS/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int? id, [Bind("RoomID,RoomName,Price,Area,Status,Description")] Room room)
-    {
-        if (id != room.RoomID)
-        {
-            return NotFound();
-        }
+            ValidateRoom(input);
+            if (!ModelState.IsValid) return View(input);
 
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                _context.Update(room);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!RoomExists(room.RoomID))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var room = await _context.Rooms.FindAsync(id);
+            if (room == null) return NotFound();
+
+            room.RoomName = input.RoomName.Trim();
+            room.Price = input.Price;
+            room.Area = input.Area;
+            room.Status = string.IsNullOrWhiteSpace(input.Status) ? "Available" : input.Status.Trim();
+            room.Description = string.IsNullOrWhiteSpace(input.Description) ? null : input.Description.Trim();
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Cập nhật phòng trọ thành công.";
             return RedirectToAction(nameof(Index));
         }
-        return View(room);
-    }
 
-    // GET: ROOMS/Delete/5
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null)
+        // GET: /Rooms/Delete/5
+        public async Task<IActionResult> Delete(int? id)
         {
-            return NotFound();
+            if (id == null) return NotFound();
+
+            var room = await _context.Rooms
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.RoomID == id.Value);
+
+            if (room == null) return NotFound();
+            return View(room);
         }
 
-        var room = await _context.Rooms
-            .FirstOrDefaultAsync(m => m.RoomID == id);
-        if (room == null)
+        // POST: /Rooms/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            return NotFound();
-        }
+            var room = await _context.Rooms.FindAsync(id);
+            if (room == null) return NotFound();
 
-        return View(room);
-    }
+            // Không xóa phòng đang được hợp đồng tham chiếu.
+            if (await _context.Contracts.AnyAsync(c => c.RoomID == id))
+            {
+                TempData["Error"] = "Không thể xóa phòng vì đã có hợp đồng liên quan.";
+                return RedirectToAction(nameof(Index));
+            }
 
-    // POST: ROOMS/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int? id)
-    {
-        var room = await _context.Rooms.FindAsync(id);
-        if (room != null)
-        {
             _context.Rooms.Remove(room);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Xóa phòng trọ thành công.";
+            return RedirectToAction(nameof(Index));
         }
 
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
-    }
-
-    private bool RoomExists(int? id)
-    {
-        return _context.Rooms.Any(e => e.RoomID == id);
+        private void ValidateRoom(Room room)
+        {
+            if (string.IsNullOrWhiteSpace(room.RoomName))
+                ModelState.AddModelError(nameof(room.RoomName), "Vui lòng nhập tên phòng.");
+            if (room.Price <= 0)
+                ModelState.AddModelError(nameof(room.Price), "Giá phòng phải lớn hơn 0.");
+            if (room.Area <= 0)
+                ModelState.AddModelError(nameof(room.Area), "Diện tích phải lớn hơn 0.");
+            var allowedStatuses = new[] { "Available", "Occupied", "Maintenance", "trống", "đang thuê", "bảo trì" };
+            if (string.IsNullOrWhiteSpace(room.Status) || !allowedStatuses.Contains(room.Status.Trim(), StringComparer.OrdinalIgnoreCase))
+                ModelState.AddModelError(nameof(room.Status), "Trạng thái phòng không hợp lệ.");
+        }
     }
 }

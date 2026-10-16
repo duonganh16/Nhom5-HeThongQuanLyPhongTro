@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RoomRentalManagement.Models;
 using System.Diagnostics;
 
 namespace RoomRentalManagement.Controllers
 {
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         public IActionResult Index()

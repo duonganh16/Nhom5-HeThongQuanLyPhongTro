@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RoomRentalManagement.Data;
@@ -5,6 +6,7 @@ using RoomRentalManagement.Models;
 
 namespace RoomRentalManagement.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class TenantsController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -6,11 +8,13 @@ using RoomRentalManagement.Models;
 
 namespace RoomRentalManagement.Controllers
 {
+    // Admin quan ly tat ca yeu cau; Tenant chi xem va tao yeu cau cua chinh minh.
+    [Authorize(Roles = "Admin,Tenant")]
     public class RequestsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        private static readonly string[] DefaultStatuses =
+        private static readonly string[] AllowedStatuses =
         {
             "Pending",
             "In Progress",
@@ -26,9 +30,20 @@ namespace RoomRentalManagement.Controllers
         // GET: /Requests
         public async Task<IActionResult> Index()
         {
-            var requests = await _context.Requests
+            var query = _context.Requests
                 .AsNoTracking()
                 .Include(r => r.Tenant)
+                .AsQueryable();
+
+            if (!User.IsInRole("Admin"))
+            {
+                var tenant = await GetCurrentTenantAsync();
+                if (tenant == null) return Forbid();
+
+                query = query.Where(r => r.TenantID == tenant.TenantID);
+            }
+
+            var requests = await query
                 .OrderByDescending(r => r.CreatedDate)
                 .ToListAsync();
 
@@ -38,16 +53,22 @@ namespace RoomRentalManagement.Controllers
         // GET: /Requests/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
-            var request = await _context.Requests
+            var query = _context.Requests
                 .AsNoTracking()
                 .Include(r => r.Tenant)
-                .FirstOrDefaultAsync(r => r.RequestID == id.Value);
+                .Where(r => r.RequestID == id.Value);
 
-            if (request == null)
-                return NotFound();
+            if (!User.IsInRole("Admin"))
+            {
+                var tenant = await GetCurrentTenantAsync();
+                if (tenant == null) return Forbid();
+                query = query.Where(r => r.TenantID == tenant.TenantID);
+            }
+
+            var request = await query.FirstOrDefaultAsync();
+            if (request == null) return NotFound();
 
             return View(request);
         }
@@ -61,183 +82,219 @@ namespace RoomRentalManagement.Controllers
                 Status = "Pending"
             };
 
-            await LoadOptionsAsync(request.TenantID, request.Status);
+            if (User.IsInRole("Admin"))
+            {
+                await LoadAdminOptionsAsync(request.TenantID, request.Status);
+            }
+            else
+            {
+                var tenant = await GetCurrentTenantAsync();
+                if (tenant == null) return Forbid();
+                request.TenantID = tenant.TenantID;
+            }
+
             return View(request);
         }
 
         // POST: /Requests/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Request request)
+        public async Task<IActionResult> Create(
+            [Bind("TenantID,Content,CreatedDate,Status,Response")] Request request)
         {
             request.Tenant = null;
-            ValidateRequest(request);
 
-            if (request.TenantID > 0 &&
-                !await _context.Tenants.AnyAsync(t => t.TenantID == request.TenantID))
+            if (User.IsInRole("Admin"))
             {
-                ModelState.AddModelError(nameof(request.TenantID), "Người thuê được chọn không tồn tại.");
+                ValidateRequest(request, allowAdminFields: true);
+
+                var tenantExists = request.TenantID > 0 &&
+                    await _context.Tenants.AnyAsync(t => t.TenantID == request.TenantID);
+
+                if (!tenantExists)
+                    ModelState.AddModelError(nameof(request.TenantID), "Vui lòng chọn người thuê hợp lệ.");
+
+                if (request.CreatedDate == default)
+                    request.CreatedDate = DateTime.Now;
+            }
+            else
+            {
+                var tenant = await GetCurrentTenantAsync();
+                if (tenant == null) return Forbid();
+
+                // Do not trust TenantID, Status, CreatedDate or Response sent by the browser.
+                request.TenantID = tenant.TenantID;
+                request.CreatedDate = DateTime.Now;
+                request.Status = "Pending";
+                request.Response = null;
+                ValidateRequest(request, allowAdminFields: false);
             }
 
             if (!ModelState.IsValid)
             {
-                await LoadOptionsAsync(request.TenantID, request.Status);
+                if (User.IsInRole("Admin"))
+                    await LoadAdminOptionsAsync(request.TenantID, request.Status);
                 return View(request);
             }
 
             request.Content = request.Content.Trim();
-            request.Status = string.IsNullOrWhiteSpace(request.Status)
-                ? "Pending"
-                : request.Status.Trim();
-
-            if (request.CreatedDate == default)
-                request.CreatedDate = DateTime.Now;
+            request.Status = User.IsInRole("Admin") ? NormalizeStatus(request.Status) : "Pending";
+            request.Response = User.IsInRole("Admin") && !string.IsNullOrWhiteSpace(request.Response)
+                ? request.Response.Trim()
+                : null;
 
             _context.Requests.Add(request);
             await _context.SaveChangesAsync();
 
+            TempData["Success"] = "Đã tạo yêu cầu thành công.";
             return RedirectToAction(nameof(Index));
         }
 
+        // Chi Admin moi duoc thay doi trang thai, phan hoi va nguoi gui.
+        [Authorize(Roles = "Admin")]
         // GET: /Requests/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var request = await _context.Requests.FindAsync(id.Value);
-            if (request == null)
-                return NotFound();
+            if (request == null) return NotFound();
 
-            await LoadOptionsAsync(request.TenantID, request.Status);
+            await LoadAdminOptionsAsync(request.TenantID, request.Status);
             return View(request);
         }
 
         // POST: /Requests/Edit/5
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Request request)
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("RequestID,TenantID,Content,CreatedDate,Status,Response")] Request input)
         {
-            if (id != request.RequestID)
-                return NotFound();
+            if (id != input.RequestID) return NotFound();
 
-            request.Tenant = null;
-            ValidateRequest(request);
+            input.Tenant = null;
+            ValidateRequest(input, allowAdminFields: true);
 
-            if (request.TenantID > 0 &&
-                !await _context.Tenants.AnyAsync(t => t.TenantID == request.TenantID))
+            if (input.TenantID <= 0 ||
+                !await _context.Tenants.AnyAsync(t => t.TenantID == input.TenantID))
             {
-                ModelState.AddModelError(nameof(request.TenantID), "Người thuê được chọn không tồn tại.");
+                ModelState.AddModelError(nameof(input.TenantID), "Vui lòng chọn người thuê hợp lệ.");
             }
 
             if (!ModelState.IsValid)
             {
-                await LoadOptionsAsync(request.TenantID, request.Status);
-                return View(request);
+                await LoadAdminOptionsAsync(input.TenantID, input.Status);
+                return View(input);
             }
 
-            var existingRequest = await _context.Requests
+            var existing = await _context.Requests
                 .FirstOrDefaultAsync(r => r.RequestID == id);
+            if (existing == null) return NotFound();
 
-            if (existingRequest == null)
-                return NotFound();
-
-            existingRequest.TenantID = request.TenantID;
-            existingRequest.Content = request.Content.Trim();
-            existingRequest.CreatedDate = request.CreatedDate == default
-                ? existingRequest.CreatedDate
-                : request.CreatedDate;
-            existingRequest.Status = string.IsNullOrWhiteSpace(request.Status)
-                ? "Pending"
-                : request.Status.Trim();
-            existingRequest.Response = string.IsNullOrWhiteSpace(request.Response)
-                ? null
-                : request.Response.Trim();
+            existing.TenantID = input.TenantID;
+            existing.Content = input.Content.Trim();
+            existing.CreatedDate = input.CreatedDate;
+            existing.Status = NormalizeStatus(input.Status);
+            existing.Response = string.IsNullOrWhiteSpace(input.Response) ? null : input.Response.Trim();
 
             await _context.SaveChangesAsync();
+            TempData["Success"] = "Đã cập nhật yêu cầu.";
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: /Requests/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var request = await _context.Requests
                 .AsNoTracking()
                 .Include(r => r.Tenant)
                 .FirstOrDefaultAsync(r => r.RequestID == id.Value);
 
-            if (request == null)
-                return NotFound();
-
+            if (request == null) return NotFound();
             return View(request);
         }
 
         // POST: /Requests/Delete/5
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var request = await _context.Requests.FindAsync(id);
-            if (request == null)
-                return NotFound();
+            if (request == null) return NotFound();
 
             _context.Requests.Remove(request);
             await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Đã xóa yêu cầu.";
             return RedirectToAction(nameof(Index));
         }
 
-        private void ValidateRequest(Request request)
+        private async Task<Tenant?> GetCurrentTenantAsync()
         {
-            if (request.TenantID <= 0)
-                ModelState.AddModelError(nameof(request.TenantID), "Vui lòng chọn người thuê.");
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out var userId)) return null;
 
-            if (string.IsNullOrWhiteSpace(request.Content))
-                ModelState.AddModelError(nameof(request.Content), "Nội dung yêu cầu không được để trống.");
-
-            if (request.Content?.Length > 2000)
-                ModelState.AddModelError(nameof(request.Content), "Nội dung không được vượt quá 2000 ký tự.");
-
-            if (request.CreatedDate > DateTime.Now.AddMinutes(5))
-                ModelState.AddModelError(nameof(request.CreatedDate), "Ngày tạo không được nằm trong tương lai.");
-
-            if (request.Response?.Length > 2000)
-                ModelState.AddModelError(nameof(request.Response), "Phản hồi không được vượt quá 2000 ký tự.");
-
-            if (string.IsNullOrWhiteSpace(request.Status))
-                request.Status = "Pending";
+            return await _context.Tenants
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.UserID == userId);
         }
 
-        private async Task LoadOptionsAsync(int? selectedTenantId, string? selectedStatus)
+        private void ValidateRequest(Request request, bool allowAdminFields)
         {
-            var tenantIds = await _context.Tenants
+            if (string.IsNullOrWhiteSpace(request.Content))
+                ModelState.AddModelError(nameof(request.Content), "Nội dung yêu cầu không được để trống.");
+            else if (request.Content.Length > 2000)
+                ModelState.AddModelError(nameof(request.Content), "Nội dung không được vượt quá 2000 ký tự.");
+
+            if (allowAdminFields)
+            {
+                if (request.CreatedDate > DateTime.Now.AddMinutes(5))
+                    ModelState.AddModelError(nameof(request.CreatedDate), "Ngày tạo không được nằm trong tương lai.");
+
+                if (string.IsNullOrWhiteSpace(request.Status) ||
+                    !AllowedStatuses.Contains(request.Status.Trim(), StringComparer.OrdinalIgnoreCase))
+                {
+                    ModelState.AddModelError(nameof(request.Status), "Trạng thái yêu cầu không hợp lệ.");
+                }
+
+                if (request.Response?.Length > 2000)
+                    ModelState.AddModelError(nameof(request.Response), "Phản hồi không được vượt quá 2000 ký tự.");
+            }
+        }
+
+        private async Task LoadAdminOptionsAsync(int? selectedTenantId, string? selectedStatus)
+        {
+            var tenants = await _context.Tenants
                 .AsNoTracking()
-                .OrderBy(t => t.TenantID)
-                .Select(t => t.TenantID)
+                .OrderBy(t => t.FullName)
                 .ToListAsync();
 
-            ViewBag.TenantOptions = tenantIds.Select(tenantId => new SelectListItem
+            ViewBag.TenantOptions = tenants.Select(t => new SelectListItem
             {
-                Value = tenantId.ToString(),
-                Text = $"Người thuê #{tenantId}",
-                Selected = selectedTenantId == tenantId
+                Value = t.TenantID.ToString(),
+                Text = $"{t.FullName} (#{t.TenantID})",
+                Selected = selectedTenantId == t.TenantID
             }).ToList();
 
-            var statuses = DefaultStatuses.ToList();
-            if (!string.IsNullOrWhiteSpace(selectedStatus) &&
-                !statuses.Contains(selectedStatus, StringComparer.OrdinalIgnoreCase))
-            {
-                statuses.Add(selectedStatus);
-            }
-
-            ViewBag.StatusOptions = statuses.Select(status => new SelectListItem
+            ViewBag.StatusOptions = AllowedStatuses.Select(status => new SelectListItem
             {
                 Value = status,
                 Text = status,
                 Selected = string.Equals(status, selectedStatus, StringComparison.OrdinalIgnoreCase)
             }).ToList();
+        }
+
+        private static string NormalizeStatus(string? status)
+        {
+            var normalized = (status ?? string.Empty).Trim();
+            return AllowedStatuses.FirstOrDefault(s =>
+                string.Equals(s, normalized, StringComparison.OrdinalIgnoreCase)) ?? "Pending";
         }
     }
 }
