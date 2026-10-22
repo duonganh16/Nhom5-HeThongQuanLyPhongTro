@@ -1,0 +1,38 @@
+@model RoomRentalManagement.Models.Contract
+@{
+    ViewData["Title"] = "Xóa hợp đồng";
+}
+
+<h1>Xóa hợp đồng</h1>
+<div class="alert alert-warning">
+    Bạn có chắc muốn xóa hợp đồng #@Model.ContractID không?
+    @if (ViewBag.CanDelete == false)
+    {
+        <div class="mt-2"><strong>Không thể xóa:</strong> hợp đồng đã có hóa đơn liên quan.</div>
+    }
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Phòng trọ</dt>
+    <dd class="col-sm-9">@(Model.Room?.RoomName ?? $"Phòng #{Model.RoomID}")</dd>
+    <dt class="col-sm-3">Người thuê</dt>
+    <dd class="col-sm-9">@(Model.Tenant?.FullName ?? $"Người thuê #{Model.TenantID}")</dd>
+    <dt class="col-sm-3">Thời hạn</dt>
+    <dd class="col-sm-9">@Model.StartDate.ToString("dd/MM/yyyy") – @(Model.EndDate.HasValue ? Model.EndDate.Value.ToString("dd/MM/yyyy") : "Không xác định")</dd>
+    <dt class="col-sm-3">Giá thuê</dt>
+    <dd class="col-sm-9">@Model.RentPrice.ToString("N0") VNĐ/tháng</dd>
+    <dt class="col-sm-3">Trạng thái</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+</dl>
+
+@if (ViewBag.CanDelete == true)
+{
+    <form asp-action="Delete" asp-route-id="@Model.ContractID" method="post">
+        <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+    </form>
+}
+else
+{
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+}

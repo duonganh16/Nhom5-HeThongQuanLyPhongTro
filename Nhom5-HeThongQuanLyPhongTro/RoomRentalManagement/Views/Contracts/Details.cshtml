@@ -1,0 +1,34 @@
+@model RoomRentalManagement.Models.Contract
+@{
+    ViewData["Title"] = "Chi tiết hợp đồng";
+}
+
+<h1>Chi tiết hợp đồng #@Model.ContractID</h1>
+<hr />
+<dl class="row">
+    <dt class="col-sm-3">Phòng trọ</dt>
+    <dd class="col-sm-9">@(Model.Room?.RoomName ?? $"Phòng #{Model.RoomID}")</dd>
+
+    <dt class="col-sm-3">Người thuê</dt>
+    <dd class="col-sm-9">@(Model.Tenant?.FullName ?? $"Người thuê #{Model.TenantID}")</dd>
+
+    <dt class="col-sm-3">Ngày bắt đầu</dt>
+    <dd class="col-sm-9">@Model.StartDate.ToString("dd/MM/yyyy")</dd>
+
+    <dt class="col-sm-3">Ngày kết thúc</dt>
+    <dd class="col-sm-9">@(Model.EndDate.HasValue ? Model.EndDate.Value.ToString("dd/MM/yyyy") : "Không xác định")</dd>
+
+    <dt class="col-sm-3">Tiền đặt cọc</dt>
+    <dd class="col-sm-9">@Model.Deposit.ToString("N0") VNĐ</dd>
+
+    <dt class="col-sm-3">Giá thuê mỗi tháng</dt>
+    <dd class="col-sm-9">@Model.RentPrice.ToString("N0") VNĐ</dd>
+
+    <dt class="col-sm-3">Trạng thái</dt>
+    <dd class="col-sm-9">
+        @(Model.Status == "Active" ? "Đang hiệu lực" : Model.Status == "Expired" ? "Đã hết hạn" : Model.Status == "Terminated" ? "Đã chấm dứt" : Model.Status)
+    </dd>
+</dl>
+
+<a asp-action="Edit" asp-route-id="@Model.ContractID" class="btn btn-primary">Sửa</a>
+<a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>

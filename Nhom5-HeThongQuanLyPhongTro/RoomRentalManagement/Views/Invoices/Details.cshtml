@@ -1,0 +1,66 @@
+@model RoomRentalManagement.Models.Invoice
+
+@{
+    ViewData["Title"] = "Chi tiết hóa đơn";
+    var statusLabel = Model.Status switch
+    {
+        "Paid" => "Đã thanh toán",
+        "Overdue" => "Quá hạn",
+        _ => "Chưa thanh toán"
+    };
+}
+
+<h1>Chi tiết hóa đơn #@Model.InvoiceID</h1>
+<hr />
+<dl class="row">
+    <dt class="col-sm-3">Tháng hóa đơn</dt>
+    <dd class="col-sm-9">@Model.BillingMonth.ToString("MM/yyyy")</dd>
+
+    <dt class="col-sm-3">Mã hợp đồng</dt>
+    <dd class="col-sm-9">@Model.ContractID</dd>
+
+    <dt class="col-sm-3">Phòng</dt>
+    <dd class="col-sm-9">@(Model.Contract?.Room?.RoomName ?? "-")</dd>
+
+    <dt class="col-sm-3">Người thuê</dt>
+    <dd class="col-sm-9">@(Model.Contract?.Tenant?.FullName ?? "-")</dd>
+
+    <dt class="col-sm-3">Chỉ số điện cũ</dt>
+    <dd class="col-sm-9">@Model.ElectricOld.ToString("N2")</dd>
+
+    <dt class="col-sm-3">Chỉ số điện mới</dt>
+    <dd class="col-sm-9">@Model.ElectricNew.ToString("N2")</dd>
+
+    <dt class="col-sm-3">Tiêu thụ điện</dt>
+    <dd class="col-sm-9">@((Model.ElectricNew - Model.ElectricOld).ToString("N2"))</dd>
+
+    <dt class="col-sm-3">Đơn giá điện</dt>
+    <dd class="col-sm-9">@Model.ElectricPrice.ToString("N2")</dd>
+
+    <dt class="col-sm-3">Chỉ số nước cũ</dt>
+    <dd class="col-sm-9">@Model.WaterOld.ToString("N2")</dd>
+
+    <dt class="col-sm-3">Chỉ số nước mới</dt>
+    <dd class="col-sm-9">@Model.WaterNew.ToString("N2")</dd>
+
+    <dt class="col-sm-3">Tiêu thụ nước</dt>
+    <dd class="col-sm-9">@((Model.WaterNew - Model.WaterOld).ToString("N2"))</dd>
+
+    <dt class="col-sm-3">Đơn giá nước</dt>
+    <dd class="col-sm-9">@Model.WaterPrice.ToString("N2")</dd>
+
+    <dt class="col-sm-3">Tiền thuê</dt>
+    <dd class="col-sm-9">@Model.RentAmount.ToString("N0")</dd>
+
+    <dt class="col-sm-3">Phí dịch vụ</dt>
+    <dd class="col-sm-9">@Model.ServiceFee.ToString("N0")</dd>
+
+    <dt class="col-sm-3">Tổng tiền</dt>
+    <dd class="col-sm-9"><strong>@Model.Total.ToString("N0")</strong></dd>
+
+    <dt class="col-sm-3">Trạng thái</dt>
+    <dd class="col-sm-9">@statusLabel</dd>
+</dl>
+
+<a asp-action="Edit" asp-route-id="@Model.InvoiceID" class="btn btn-primary">Sửa</a>
+<a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>

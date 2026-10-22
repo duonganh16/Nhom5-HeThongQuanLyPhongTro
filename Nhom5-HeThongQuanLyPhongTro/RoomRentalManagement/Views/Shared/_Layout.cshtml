@@ -1,0 +1,172 @@
+﻿
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - RoomRentalManagement</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- CSS chính của website -->
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <!-- CSS được sinh bởi ASP.NET Core -->
+    <link rel="stylesheet"
+          href="~/RoomRentalManagement.styles.css"
+          asp-append-version="true" />
+</head>
+
+<body>
+    <!-- Thanh điều hướng -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-3">
+            <div class="container-fluid">
+
+                <!-- Tên hệ thống -->
+                <a class="navbar-brand fw-bold"
+                   asp-area=""
+                   asp-controller="Home"
+                   asp-action="Index">
+                    RoomRentalManagement
+                </a>
+
+                <!-- Nút thu gọn menu trên màn hình nhỏ -->
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar"
+                        aria-expanded="false"
+                        aria-label="Mở menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Danh sách chức năng -->
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto">
+
+                        <!-- Trang chủ -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area=""
+                               asp-controller="Home"
+                               asp-action="Index">
+                                Trang chủ
+                            </a>
+                        </li>
+
+                        <!-- Quản lý phòng trọ -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area=""
+                               asp-controller="Rooms"
+                               asp-action="Index">
+                                Phòng trọ
+                            </a>
+                        </li>
+
+                        <!-- Quản lý người thuê -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area=""
+                               asp-controller="Tenants"
+                               asp-action="Index">
+                                Người thuê
+                            </a>
+                        </li>
+
+                        <!-- Quản lý hợp đồng -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area=""
+                               asp-controller="Contracts"
+                               asp-action="Index">
+                                Hợp đồng
+                            </a>
+                        </li>
+
+                        <!-- Quản lý hóa đơn -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area=""
+                               asp-controller="Invoices"
+                               asp-action="Index">
+                                Hóa đơn
+                            </a>
+                        </li>
+
+                        <!-- Quản lý thanh toán -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area=""
+                               asp-controller="Payments"
+                               asp-action="Index">
+                                Thanh toán
+                            </a>
+                        </li>
+
+                        <!-- Quản lý yêu cầu -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area=""
+                               asp-controller="Requests"
+                               asp-action="Index">
+                                Yêu cầu
+                            </a>
+                        </li>
+
+                        <!-- Chính sách bảo mật -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area=""
+                               asp-controller="Home"
+                               asp-action="Privacy">
+                                Privacy
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Nội dung của từng trang -->
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Chân trang -->
+    <footer class="border-top footer text-muted mt-4 py-3">
+        <div class="container">
+            &copy; @DateTime.Now.Year - RoomRentalManagement
+            |
+            <a asp-area=""
+               asp-controller="Home"
+               asp-action="Privacy">
+                Privacy
+            </a>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
+    <!-- Cho phép từng trang thêm JavaScript riêng -->
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+```
