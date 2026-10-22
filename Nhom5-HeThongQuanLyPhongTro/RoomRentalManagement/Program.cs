@@ -2,14 +2,22 @@ using Microsoft.EntityFrameworkCore;
 using RoomRentalManagement.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// ===============================
-// KẾT NỐI DATABASE SQL SERVER
-// ===============================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
+
+// ===============================
+// KẾT NỐI DATABASE SQL SERVER
+// ===============================
+builder.Services.AddAuthentication(
+    Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme
+)
+.AddCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+});
 
 // ===============================
 // MVC
@@ -33,6 +41,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 // ===============================

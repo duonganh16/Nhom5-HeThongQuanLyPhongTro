@@ -1,0 +1,122 @@
+
+@model IEnumerable<RoomRentalManagement.Models.User>
+
+@{
+    ViewData["Title"] = "Quản lý tài khoản";
+}
+
+<div class="container mt-4">
+    <h2>Quản lý tài khoản</h2>
+    <p>Danh sách tất cả tài khoản trong hệ thống.</p>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Message"]
+        </div>
+    }
+
+    <!-- Các nút chức năng -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+
+        <a asp-controller="Users"
+           asp-action="Index"
+           class="btn btn-primary">
+            Tất cả tài khoản
+        </a>
+
+        <a asp-controller="Users"
+           asp-action="Landlords"
+           class="btn btn-info text-white">
+            Danh sách chủ nhà
+        </a>
+
+        <a asp-controller="Users"
+           asp-action="Pending"
+           class="btn btn-warning">
+            Tài khoản chờ duyệt
+        </a>
+
+        <a asp-controller="Users"
+           asp-action="Create"
+           class="btn btn-success">
+            + Tạo tài khoản mới
+        </a>
+
+    </div>
+
+    <!-- Bảng tất cả tài khoản -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <strong>Tất cả tài khoản</strong>
+        </div>
+
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Mã tài khoản</th>
+                                <th>Họ và tên</th>
+                                <th>Tên đăng nhập</th>
+                                <th>Vai trò</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td>@user.UserID</td>
+                                    <td>@user.FullName</td>
+                                    <td>@user.Username</td>
+                                    <td>
+                                        @(user.Role == "Admin" ? "Quản trị viên" :
+                                          user.Role == "Landlord" ? "Chủ nhà" :
+                                          user.Role == "Tenant" ? "Người thuê" :
+                                          user.Role)
+                                    </td>
+                                    <td>
+                                        @if (user.Status == "Active")
+                                        {
+                                            <span class="badge bg-success">
+                                                Đã kích hoạt
+                                            </span>
+                                        }
+                                        else if (user.Status == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                Chờ duyệt
+                                            </span>
+                                        }
+                                        else if (user.Status == "Rejected")
+                                        {
+                                            <span class="badge bg-danger">
+                                                Bị từ chối
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                @user.Status
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    Chưa có tài khoản nào trong hệ thống.
+                </div>
+            }
+        </div>
+    </div>
+</div>

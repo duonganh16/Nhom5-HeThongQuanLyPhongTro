@@ -1,0 +1,57 @@
+
+@{
+    ViewData["Title"] = "Thống kê";
+}
+
+<h2 class="mb-4">Thống kê hệ thống</h2>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card shadow-sm p-3">
+            <h5>Tổng số phòng</h5>
+            <h2>@ViewBag.TotalRooms</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm p-3">
+            <h5>Người thuê</h5>
+            <h2>@ViewBag.TotalTenants</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm p-3">
+            <h5>Hợp đồng</h5>
+            <h2>@ViewBag.TotalContracts</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm p-3">
+            <h5>Hóa đơn</h5>
+            <h2>@ViewBag.TotalInvoices</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm p-3">
+            <h5>Lượt thanh toán</h5>
+            <h2>@ViewBag.TotalPayments</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm p-3">
+            <h5>Yêu cầu / Sự cố</h5>
+            <h2>@ViewBag.TotalRequests</h2>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm p-3">
+            <h5>Tổng tiền thanh toán</h5>
+            <h2>@(((decimal)ViewBag.TotalRevenue).ToString("N0")) VNĐ</h2>
+        </div>
+    </div>
+</div>

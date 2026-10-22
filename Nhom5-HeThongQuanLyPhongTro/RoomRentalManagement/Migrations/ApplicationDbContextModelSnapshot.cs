@@ -203,6 +203,9 @@ namespace RoomRentalManagement.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("LandlordID")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -216,6 +219,8 @@ namespace RoomRentalManagement.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoomID");
+
+                    b.HasIndex("LandlordID");
 
                     b.ToTable("Rooms");
                 });
@@ -341,6 +346,16 @@ namespace RoomRentalManagement.Migrations
                         .IsRequired();
 
                     b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("RoomRentalManagement.Models.Room", b =>
+                {
+                    b.HasOne("RoomRentalManagement.Models.User", "Landlord")
+                        .WithMany()
+                        .HasForeignKey("LandlordID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Landlord");
                 });
 
             modelBuilder.Entity("RoomRentalManagement.Models.Tenant", b =>

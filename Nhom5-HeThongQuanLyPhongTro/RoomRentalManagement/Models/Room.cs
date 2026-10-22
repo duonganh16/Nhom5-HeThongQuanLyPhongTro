@@ -1,4 +1,5 @@
-﻿namespace RoomRentalManagement.Models
+﻿
+namespace RoomRentalManagement.Models
 {
     public class Room
     {
@@ -13,5 +14,10 @@
         public string Status { get; set; } = "Available";
 
         public string? Description { get; set; }
+
+        // Tài khoản chủ nhà sở hữu phòng
+        public int? LandlordID { get; set; }
+
+        public User? Landlord { get; set; }
     }
 }

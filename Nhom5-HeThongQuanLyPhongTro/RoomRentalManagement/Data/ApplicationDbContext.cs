@@ -43,6 +43,13 @@ namespace RoomRentalManagement.Data
                 .HasForeignKey(c => c.RoomID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // User (Landlord) - Room
+            modelBuilder.Entity<Room>()
+                .HasOne(r => r.Landlord)
+                .WithMany()
+                .HasForeignKey(r => r.LandlordID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Tenant - Contract
             modelBuilder.Entity<Contract>()
                 .HasOne(c => c.Tenant)

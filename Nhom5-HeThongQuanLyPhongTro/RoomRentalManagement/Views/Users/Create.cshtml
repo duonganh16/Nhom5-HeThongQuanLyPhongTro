@@ -1,0 +1,51 @@
+
+@{
+    ViewData["Title"] = "Tạo tài khoản";
+}
+
+<div class="container mt-4" style="max-width:600px">
+    <h2>Tạo tài khoản mới</h2>
+    <p>Chỉ Admin mới được tạo tài khoản.</p>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+
+    <form asp-controller="Users" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label class="form-label">Họ và tên</label>
+            <input name="fullName" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Tên đăng nhập</label>
+            <input name="username" class="form-control"
+                   autocomplete="username" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mật khẩu (ít nhất 10 ký tự)</label>
+            <input name="password" type="password" class="form-control"
+                   minlength="10" autocomplete="new-password" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Vai trò</label>
+            <select name="role" class="form-select" required>
+                <option value="">-- Chọn vai trò --</option>
+                <option value="Landlord">Chủ nhà</option>
+                <option value="Tenant">Người thuê</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Tạo tài khoản
+        </button>
+
+        <a asp-controller="Users" asp-action="Index"
+           class="btn btn-secondary">Quay lại</a>
+    </form>
+</div>

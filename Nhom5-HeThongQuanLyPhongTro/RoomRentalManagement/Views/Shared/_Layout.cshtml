@@ -1,172 +1,534 @@
 ﻿
+@{
+    ViewData["Title"] = ViewData["Title"] ?? "Tổng quan";
+}
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>@ViewData["Title"] - RoomRentalManagement</title>
+    <title>@ViewData["Title"] - AN CƯ HOME</title>
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet"
-          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Nhom5.HeThongQuanLyPhongTro.styles.css" asp-append-version="true" />
 
-    <!-- CSS chính của website -->
-    <link rel="stylesheet"
-          href="~/css/site.css"
-          asp-append-version="true" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    <!-- CSS được sinh bởi ASP.NET Core -->
-    <link rel="stylesheet"
-          href="~/RoomRentalManagement.styles.css"
-          asp-append-version="true" />
+        body {
+            margin: 0;
+            background: #f4f7fc;
+            color: #263248;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 16px;
+        }
+
+        button,
+        input,
+        select,
+        textarea,
+        table {
+            font-family: "Times New Roman", Times, serif;
+        }
+
+        .app-sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 250px;
+            padding: 22px 14px;
+            overflow-y: auto;
+            background: #172554;
+            color: white;
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 5px 8px 28px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .brand:hover {
+            color: white;
+        }
+
+        .brand-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 46px;
+            height: 46px;
+            flex-shrink: 0;
+            border-radius: 13px;
+            background: #3b82f6;
+            font-size: 26px;
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: .3px;
+        }
+
+        .brand-subtitle {
+            display: block;
+            margin-top: 4px;
+            color: #cbd5e1;
+            font-size: 12px;
+            font-weight: normal;
+            letter-spacing: 0;
+        }
+
+        .menu-label {
+            padding: 12px 12px 8px;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 12px;
+            margin-bottom: 4px;
+            border-radius: 9px;
+            color: #dbeafe;
+            font-size: 15px;
+            text-decoration: none;
+            transition: background .2s, color .2s;
+        }
+
+        .menu-link:hover,
+        .menu-link.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .menu-icon {
+            width: 24px;
+            flex-shrink: 0;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .sidebar-footer {
+            margin-top: 24px;
+            padding: 16px 12px;
+            border-top: 1px solid #334155;
+            color: #cbd5e1;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .app-main {
+            min-height: 100vh;
+            margin-left: 250px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 30px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .page-heading {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .page-description {
+            margin: 5px 0 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: #f1f5f9;
+            border-radius: 12px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .user-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        .content-area {
+            padding: 28px 30px;
+            min-height: 400px;
+        }
+
+        .app-footer {
+            padding: 18px 30px;
+            border-top: 1px solid #e5e7eb;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        @@media (max-width: 768px) {
+            .app-sidebar {
+                position: relative;
+                width: 100%;
+                max-height: none;
+                bottom: auto;
+            }
+
+            .app-main {
+                margin-left: 0;
+            }
+
+            .topbar {
+                padding: 16px;
+            }
+
+            .content-area {
+                padding: 18px 16px;
+            }
+
+            .page-heading {
+                font-size: 21px;
+            }
+        }
+
+        @@media (max-width: 420px) {
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .user-badge {
+                white-space: normal;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Thanh điều hướng -->
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-3">
-            <div class="container-fluid">
+    <aside class="app-sidebar">
 
-                <!-- Tên hệ thống -->
-                <a class="navbar-brand fw-bold"
-                   asp-area=""
-                   asp-controller="Home"
-                   asp-action="Index">
-                    RoomRentalManagement
-                </a>
+        <!-- THƯƠNG HIỆU -->
+        <a class="brand"
+           asp-controller="Home"
+           asp-action="Index">
 
-                <!-- Nút thu gọn menu trên màn hình nhỏ -->
-                <button class="navbar-toggler"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#mainNavbar"
-                        aria-controls="mainNavbar"
-                        aria-expanded="false"
-                        aria-label="Mở menu">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+            <span class="brand-icon">⌂</span>
 
-                <!-- Danh sách chức năng -->
-                <div class="collapse navbar-collapse" id="mainNavbar">
-                    <ul class="navbar-nav me-auto">
+            <span class="brand-name">
+                AN CƯ HOME
+                <span class="brand-subtitle">
+                    Hệ thống quản lý phòng trọ
+                </span>
+            </span>
+        </a>
 
-                        <!-- Trang chủ -->
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               asp-area=""
-                               asp-controller="Home"
-                               asp-action="Index">
-                                Trang chủ
-                            </a>
-                        </li>
+        <!-- DASHBOARD CHO CÁC VAI TRÒ -->
+        <div class="menu-label">TỔNG QUAN</div>
 
-                        <!-- Quản lý phòng trọ -->
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               asp-area=""
-                               asp-controller="Rooms"
-                               asp-action="Index">
-                                Phòng trọ
-                            </a>
-                        </li>
+        <a class="menu-link"
+           asp-controller="Home"
+           asp-action="Index">
+            <span class="menu-icon">▦</span>
+            <span>Dashboard</span>
+        </a>
 
-                        <!-- Quản lý người thuê -->
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               asp-area=""
-                               asp-controller="Tenants"
-                               asp-action="Index">
-                                Người thuê
-                            </a>
-                        </li>
+        @if (User.IsInRole("Admin"))
+        {
+            <!-- ================= ADMIN ================= -->
 
-                        <!-- Quản lý hợp đồng -->
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               asp-area=""
-                               asp-controller="Contracts"
-                               asp-action="Index">
-                                Hợp đồng
-                            </a>
-                        </li>
+            <div class="menu-label">QUẢN LÝ</div>
 
-                        <!-- Quản lý hóa đơn -->
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               asp-area=""
-                               asp-controller="Invoices"
-                               asp-action="Index">
-                                Hóa đơn
-                            </a>
-                        </li>
+            <a class="menu-link"
+               asp-controller="Rooms"
+               asp-action="Index">
+                <span class="menu-icon">⌂</span>
+                <span>Quản lý phòng</span>
+            </a>
 
-                        <!-- Quản lý thanh toán -->
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               asp-area=""
-                               asp-controller="Payments"
-                               asp-action="Index">
-                                Thanh toán
-                            </a>
-                        </li>
+            <a class="menu-link"
+               asp-controller="Tenants"
+               asp-action="Index">
+                <span class="menu-icon">♙</span>
+                <span>Người thuê</span>
+            </a>
 
-                        <!-- Quản lý yêu cầu -->
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               asp-area=""
-                               asp-controller="Requests"
-                               asp-action="Index">
-                                Yêu cầu
-                            </a>
-                        </li>
+            <a class="menu-link"
+               asp-controller="Contracts"
+               asp-action="Index">
+                <span class="menu-icon">▤</span>
+                <span>Hợp đồng</span>
+            </a>
 
-                        <!-- Chính sách bảo mật -->
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               asp-area=""
-                               asp-controller="Home"
-                               asp-action="Privacy">
-                                Privacy
-                            </a>
-                        </li>
+            <div class="menu-label">QUẢN LÝ TÀI KHOẢN</div>
 
-                    </ul>
-                </div>
+            <a class="menu-link"
+               asp-controller="Users"
+               asp-action="Index">
+                <span class="menu-icon">♙</span>
+                <span>Tất cả tài khoản</span>
+            </a>
+
+            <a class="menu-link"
+               asp-controller="Users"
+               asp-action="Landlords">
+                <span class="menu-icon">⌂</span>
+                <span>Danh sách chủ nhà</span>
+            </a>
+
+            <a class="menu-link"
+               asp-controller="Users"
+               asp-action="Pending">
+                <span class="menu-icon">◷</span>
+                <span>Tài khoản chờ duyệt</span>
+            </a>
+
+            <div class="menu-label">TÀI CHÍNH</div>
+
+            <a class="menu-link"
+               asp-controller="Invoices"
+               asp-action="Index">
+                <span class="menu-icon">▧</span>
+                <span>Hóa đơn</span>
+            </a>
+
+            <a class="menu-link"
+               asp-controller="Payments"
+               asp-action="Index">
+                <span class="menu-icon">₫</span>
+                <span>Thanh toán</span>
+            </a>
+
+            <a class="menu-link"
+               asp-controller="Statistics"
+               asp-action="Index">
+                <span class="menu-icon">▥</span>
+                <span>Thống kê</span>
+            </a>
+
+            <div class="menu-label">HỖ TRỢ</div>
+
+            <a class="menu-link"
+               asp-controller="Requests"
+               asp-action="Index">
+                <span class="menu-icon">♧</span>
+                <span>Yêu cầu / Sự cố</span>
+            </a>
+        }
+        else if (User.IsInRole("Landlord"))
+        {
+            <!-- ================= CHỦ NHÀ ================= -->
+
+            <div class="menu-label">QUẢN LÝ CHO THUÊ</div>
+
+            <a class="menu-link"
+               asp-controller="Rooms"
+               asp-action="Index">
+                <span class="menu-icon">⌂</span>
+                <span>Phòng của tôi</span>
+            </a>
+
+            <a class="menu-link"
+               asp-controller="Contracts"
+               asp-action="Index">
+                <span class="menu-icon">▤</span>
+                <span>Hợp đồng</span>
+            </a>
+
+            <div class="menu-label">TÀI CHÍNH</div>
+
+            <a class="menu-link"
+               asp-controller="Invoices"
+               asp-action="Index">
+                <span class="menu-icon">▧</span>
+                <span>Hóa đơn</span>
+            </a>
+
+            <a class="menu-link"
+               asp-controller="Payments"
+               asp-action="Index">
+                <span class="menu-icon">₫</span>
+                <span>Thanh toán</span>
+            </a>
+
+            <a class="menu-link"
+               asp-controller="Statistics"
+               asp-action="Index">
+                <span class="menu-icon">▥</span>
+                <span>Thống kê</span>
+            </a>
+
+            <div class="menu-label">HỖ TRỢ</div>
+
+            <a class="menu-link"
+               asp-controller="Requests"
+               asp-action="Index">
+                <span class="menu-icon">♧</span>
+                <span>Yêu cầu / Sự cố</span>
+            </a>
+        }
+        else if (User.IsInRole("Tenant"))
+        {
+            <!-- ================= NGƯỜI THUÊ ================= -->
+
+            <div class="menu-label">THÔNG TIN THUÊ PHÒNG</div>
+
+            <a class="menu-link"
+               asp-controller="Rooms"
+               asp-action="Index">
+                <span class="menu-icon">⌂</span>
+                <span>Phòng đang thuê</span>
+            </a>
+
+            <a class="menu-link"
+               asp-controller="Contracts"
+               asp-action="Index">
+                <span class="menu-icon">▤</span>
+                <span>Hợp đồng của tôi</span>
+            </a>
+
+            <div class="menu-label">HÓA ĐƠN & THANH TOÁN</div>
+
+            <a class="menu-link"
+               asp-controller="Invoices"
+               asp-action="Index">
+                <span class="menu-icon">▧</span>
+                <span>Hóa đơn của tôi</span>
+            </a>
+
+            <a class="menu-link"
+               asp-controller="Payments"
+               asp-action="Index">
+                <span class="menu-icon">₫</span>
+                <span>Lịch sử thanh toán</span>
+            </a>
+
+            <div class="menu-label">HỖ TRỢ</div>
+
+            <a class="menu-link"
+               asp-controller="Requests"
+               asp-action="Index">
+                <span class="menu-icon">♧</span>
+                <span>Gửi yêu cầu / Báo sự cố</span>
+            </a>
+        }
+
+        <!-- CHÂN MENU -->
+        <div class="sidebar-footer">
+            <div><strong>AN CƯ HOME</strong></div>
+            <div>Hệ thống quản lý phòng trọ</div>
+        </div>
+
+    </aside>
+
+    <div class="app-main">
+
+        <!-- THANH TIÊU ĐỀ -->
+        <header class="topbar">
+            <div>
+                <h1 class="page-heading">@ViewData["Title"]</h1>
+                <p class="page-description">
+                    Hệ thống quản lý phòng trọ AN CƯ HOME
+                </p>
             </div>
-        </nav>
-    </header>
 
-    <!-- Nội dung của từng trang -->
-    <div class="container">
-        <main role="main" class="pb-3">
+            <div class="user-badge">
+                <span class="user-avatar">
+                    @(User.Identity?.Name?.Length > 0
+                        ? User.Identity.Name.Substring(0, 1).ToUpper()
+                        : "U")
+                </span>
+
+                <span>
+                    <strong>
+                        @(User.FindFirst(
+                            System.Security.Claims.ClaimTypes.GivenName)?.Value
+                            ?? User.Identity?.Name
+                            ?? "Người dùng")
+                    </strong>
+
+                    <br />
+
+                    <span class="text-secondary">
+                        @(User.IsInRole("Admin") ? "Quản trị viên"
+                            : User.IsInRole("Landlord") ? "Chủ nhà"
+                            : User.IsInRole("Tenant") ? "Người thuê"
+                            : "Chưa đăng nhập")
+                    </span>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-controller="Account"
+                              asp-action="Logout"
+                              method="post"
+                              class="mt-1">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-danger">
+                                Đăng xuất
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="mt-1">
+                            <a asp-controller="Account"
+                               asp-action="Login"
+                               class="btn btn-sm btn-primary">
+                                Đăng nhập
+                            </a>
+                        </div>
+                    }
+                </span>
+            </div>
+        </header>
+
+        <!-- NỘI DUNG TRANG -->
+        <main class="content-area">
             @RenderBody()
         </main>
+
+        <!-- CHÂN TRANG -->
+        <footer class="app-footer">
+            © 2026 AN CƯ HOME - Hệ thống quản lý phòng trọ
+        </footer>
+
     </div>
 
-    <!-- Chân trang -->
-    <footer class="border-top footer text-muted mt-4 py-3">
-        <div class="container">
-            &copy; @DateTime.Now.Year - RoomRentalManagement
-            |
-            <a asp-area=""
-               asp-controller="Home"
-               asp-action="Privacy">
-                Privacy
-            </a>
-        </div>
-    </footer>
-
-    <!-- JavaScript -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <script src="~/js/site.js"
-            asp-append-version="true"></script>
-
-    <!-- Cho phép từng trang thêm JavaScript riêng -->
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-```

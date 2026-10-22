@@ -1,8 +1,960 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿
+@using System.Globalization
+@using System.Security.Claims
+@using RoomRentalManagement.Models
+
+@{
+    ViewData["Title"] = "Tổng quan";
+
+    int totalRooms = ViewBag.TotalRooms ?? 0;
+    int occupiedRooms = ViewBag.OccupiedRooms ?? 0;
+    int vacantRooms = ViewBag.VacantRooms ?? 0;
+    int totalContracts = ViewBag.TotalContracts ?? 0;
+    int totalTenants = ViewBag.TotalTenants ?? 0;
+    int totalInvoices = ViewBag.TotalInvoices ?? 0;
+    int unpaidInvoices = ViewBag.UnpaidInvoices ?? 0;
+    int totalRequests = ViewBag.TotalRequests ?? 0;
+    decimal revenue = ViewBag.RevenueThisMonth ?? 0m;
+
+    bool isAdmin = ViewBag.IsAdmin == true;
+    bool isLandlord = ViewBag.IsLandlord == true;
+    bool isTenant = ViewBag.IsTenant == true;
+
+    var recentInvoices =
+        ViewBag.RecentInvoices as IEnumerable<Invoice>
+        ?? Enumerable.Empty<Invoice>();
+
+    var recentPayments =
+        ViewBag.RecentPayments as IEnumerable<Payment>
+        ?? Enumerable.Empty<Payment>();
+
+    int occupiedPercent = totalRooms > 0
+        ? (int)Math.Round(occupiedRooms * 100.0 / totalRooms)
+        : 0;
+
+    int vacantPercent = totalRooms > 0
+        ? 100 - occupiedPercent
+        : 0;
+
+    string displayName =
+        User.FindFirst(ClaimTypes.GivenName)?.Value
+        ?? User.Identity?.Name
+        ?? "bạn";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .dashboard {
+        font-family: "Times New Roman", Times, serif;
+        color: #1e2d4d;
+    }
+
+    .dashboard .welcome-panel {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        padding: 27px;
+        margin-bottom: 25px;
+        border-radius: 18px;
+        color: white;
+        background: linear-gradient(120deg, #173778, #2563eb);
+        box-shadow: 0 8px 22px rgba(37, 99, 235, .13);
+    }
+
+    .dashboard .welcome-panel h2 {
+        margin: 0 0 10px;
+        font-size: 29px;
+        font-weight: bold;
+    }
+
+    .dashboard .welcome-panel p {
+        margin: 0;
+        color: #dbeafe;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .dashboard .welcome-symbol {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 70px;
+        height: 70px;
+        flex-shrink: 0;
+        border-radius: 18px;
+        background: rgba(255,255,255,.15);
+        font-size: 36px;
+    }
+
+    .dashboard .section-title {
+        margin: 25px 0 15px;
+        font-size: 23px;
+        font-weight: bold;
+    }
+
+    .dashboard .stat-card {
+        height: 100%;
+        padding: 21px;
+        background: white;
+        border: 1px solid #e8edf5;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(30, 50, 90, .045);
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .dashboard .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 9px 22px rgba(30, 50, 90, .09);
+    }
+
+    .dashboard .stat-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .dashboard .stat-label {
+        color: #64748b;
+        font-size: 16px;
+    }
+
+    .dashboard .stat-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        border-radius: 13px;
+        background: #eaf2ff;
+        color: #2563eb;
+        font-size: 23px;
+    }
+
+    .dashboard .stat-number {
+        font-size: 31px;
+        font-weight: bold;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+    }
+
+    .dashboard .stat-note {
+        margin-top: 8px;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .dashboard .panel {
+        height: 100%;
+        padding: 22px;
+        border: 1px solid #e8edf5;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 4px 12px rgba(30, 50, 90, .045);
+    }
+
+    .dashboard .panel-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding-bottom: 15px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid #edf1f7;
+        font-size: 21px;
+        font-weight: bold;
+    }
+
+    .dashboard .action-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .dashboard .action-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px;
+        border: 1px solid #e5eaf3;
+        border-radius: 12px;
+        background: white;
+        color: #263b60;
+        text-decoration: none;
+        transition: .2s;
+        min-width: 0;
+    }
+
+    .dashboard .action-link:hover {
+        border-color: #93c5fd;
+        background: #f3f7ff;
+        color: #1d4ed8;
+        transform: translateY(-2px);
+    }
+
+    .dashboard .action-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        border-radius: 11px;
+        background: #eaf2ff;
+        color: #2563eb;
+        font-size: 21px;
+    }
+
+    .dashboard .action-link strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .dashboard .action-link small {
+        display: block;
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .dashboard .dashboard-table {
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+
+    .dashboard .dashboard-table th {
+        color: #64748b;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .dashboard .dashboard-table td,
+    .dashboard .dashboard-table th {
+        padding: 12px 8px;
+    }
+
+    .dashboard .empty-state {
+        padding: 24px 10px;
+        color: #64748b;
+        text-align: center;
+        line-height: 1.6;
+    }
+
+    .dashboard .tenant-note {
+        padding: 16px 18px;
+        border-radius: 12px;
+        background: #eff6ff;
+        color: #1e40af;
+        line-height: 1.7;
+    }
+
+    .dashboard .donut-area {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 25px;
+        flex-wrap: wrap;
+        padding: 12px 0;
+    }
+
+    .dashboard .donut {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 175px;
+        height: 175px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: conic-gradient(
+            #2563eb 0%,
+            #2563eb @(occupiedPercent)%,
+            #bfdbfe @(occupiedPercent)%,
+            #bfdbfe 100%
+        );
+    }
+
+    .dashboard .donut-center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 115px;
+        height: 115px;
+        border-radius: 50%;
+        background: white;
+    }
+
+    .dashboard .donut-center strong {
+        font-size: 29px;
+    }
+
+    .dashboard .donut-center span {
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .dashboard .legend {
+        min-width: 155px;
+        flex: 1;
+    }
+
+    .dashboard .legend-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        background: #f8fafc;
+    }
+
+    .dashboard .legend-dot {
+        width: 12px;
+        height: 12px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: #2563eb;
+    }
+
+    .dashboard .legend-dot.vacant {
+        background: #93c5fd;
+    }
+
+    .dashboard .legend-value {
+        margin-left: auto;
+        color: #1d4ed8;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard .welcome-panel {
+            padding: 20px;
+        }
+
+        .dashboard .welcome-panel h2 {
+            font-size: 23px;
+        }
+
+        .dashboard .welcome-symbol {
+            width: 55px;
+            height: 55px;
+            font-size: 28px;
+        }
+
+        .dashboard .action-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard .donut {
+            width: 150px;
+            height: 150px;
+        }
+
+        .dashboard .donut-center {
+            width: 100px;
+            height: 100px;
+        }
+    }
+</style>
+
+<div class="dashboard">
+
+    @* ================= NGƯỜI THUÊ ================= *@
+    @if (isTenant)
+    {
+        <div class="welcome-panel">
+            <div>
+                <h2>Xin chào, @displayName!</h2>
+                <p>Chào mừng bạn đến với không gian thuê phòng AN CƯ HOME.</p>
+                <p class="mt-2">
+                    Hôm nay:
+                    @DateTime.Today.ToString(
+                        "dddd, dd/MM/yyyy",
+                        new CultureInfo("vi-VN"))
+                </p>
+            </div>
+            <div class="welcome-symbol">⌂</div>
+        </div>
+
+        <h2 class="section-title">Thông tin thuê phòng của tôi</h2>
+
+        <div class="row g-3">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Phòng đang thuê</span>
+                        <span class="stat-icon">⌂</span>
+                    </div>
+                    <div class="stat-number">@occupiedRooms</div>
+                    <div class="stat-note">Phòng thuộc hợp đồng của bạn</div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Hợp đồng của tôi</span>
+                        <span class="stat-icon">▤</span>
+                    </div>
+                    <div class="stat-number">@totalContracts</div>
+                    <div class="stat-note">Hợp đồng liên kết với tài khoản</div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Hóa đơn cần thanh toán</span>
+                        <span class="stat-icon"
+                              style="background:#fff1f2;color:#e11d48">▧</span>
+                    </div>
+                    <div class="stat-number" style="color:#e11d48">
+                        @unpaidInvoices
+                    </div>
+                    <div class="stat-note">Hóa đơn chưa thanh toán hoặc quá hạn</div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Yêu cầu / Sự cố</span>
+                        <span class="stat-icon"
+                              style="background:#dcfce7;color:#15803d">♧</span>
+                    </div>
+                    <div class="stat-number">@totalRequests</div>
+                    <div class="stat-note">Yêu cầu đã gửi của bạn</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Dịch vụ dành cho bạn</h2>
+
+        <div class="panel">
+            <div class="action-grid">
+                <a asp-controller="Rooms" asp-action="Index"
+                   class="action-link">
+                    <span class="action-icon">⌂</span>
+                    <span>
+                        <strong>Phòng đang thuê</strong>
+                        <small>Xem danh sách phòng liên quan</small>
+                    </span>
+                </a>
+
+                <a asp-controller="Contracts" asp-action="Index"
+                   class="action-link">
+                    <span class="action-icon">▤</span>
+                    <span>
+                        <strong>Hợp đồng của tôi</strong>
+                        <small>Xem thông tin hợp đồng thuê</small>
+                    </span>
+                </a>
+
+                <a asp-controller="Invoices" asp-action="Index"
+                   class="action-link">
+                    <span class="action-icon">▧</span>
+                    <span>
+                        <strong>Hóa đơn của tôi</strong>
+                        <small>Kiểm tra tiền phòng và dịch vụ</small>
+                    </span>
+                </a>
+
+                <a asp-controller="Payments" asp-action="Index"
+                   class="action-link">
+                    <span class="action-icon">₫</span>
+                    <span>
+                        <strong>Lịch sử thanh toán</strong>
+                        <small>Tra cứu các khoản đã thanh toán</small>
+                    </span>
+                </a>
+
+                <a asp-controller="Requests" asp-action="Index"
+                   class="action-link">
+                    <span class="action-icon">♧</span>
+                    <span>
+                        <strong>Gửi yêu cầu / Báo sự cố</strong>
+                        <small>Liên hệ chủ nhà để được hỗ trợ</small>
+                    </span>
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-12 col-xl-6">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <span>▧ Hóa đơn gần đây</span>
+                        <a asp-controller="Invoices" asp-action="Index"
+                           class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                    </div>
+
+                    @if (recentInvoices.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover dashboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã</th>
+                                        <th>Kỳ hóa đơn</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var invoice in recentInvoices)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Invoices"
+                                                   asp-action="Details"
+                                                   asp-route-id="@invoice.InvoiceID">
+                                                    #@invoice.InvoiceID
+                                                </a>
+                                            </td>
+                                            <td>@invoice.BillingMonth.ToString("MM/yyyy")</td>
+                                            <td>@invoice.Total.ToString("N0") đ</td>
+                                            <td>
+                                                @if (invoice.Status == "Paid")
+                                                {
+                                                    <span class="badge bg-success">Đã thanh toán</span>
+                                                }
+                                                else if (invoice.Status == "Overdue")
+                                                {
+                                                    <span class="badge bg-danger">Quá hạn</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">Chưa thanh toán</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            Chưa có hóa đơn liên kết với tài khoản của bạn.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-6">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <span>₫ Thanh toán gần đây</span>
+                        <a asp-controller="Payments" asp-action="Index"
+                           class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                    </div>
+
+                    @if (recentPayments.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover dashboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ngày thanh toán</th>
+                                        <th>Số tiền</th>
+                                        <th>Phương thức</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var payment in recentPayments)
+                                    {
+                                        <tr>
+                                            <td>@payment.PaymentDate.ToString("dd/MM/yyyy")</td>
+                                            <td class="fw-bold text-success">
+                                                @payment.Amount.ToString("N0") đ
+                                            </td>
+                                            <td>@payment.PaymentMethod</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            Chưa có giao dịch thanh toán liên kết với tài khoản.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="tenant-note mt-4">
+            <strong>Lưu ý:</strong> Nếu thông tin phòng, hợp đồng hoặc hóa đơn
+            chưa hiển thị, hãy liên hệ chủ nhà để kiểm tra việc liên kết tài khoản
+            với hồ sơ thuê phòng.
+        </div>
+    }
+    @* ================= ADMIN VÀ CHỦ NHÀ ================= *@
+    else
+    {
+        <div class="welcome-panel">
+            <div>
+                <h2>Xin chào, @displayName!</h2>
+                <p>Chào mừng đến với AN CƯ HOME. Hãy cùng quản lý công việc cho thuê hiệu quả hơn.</p>
+                <p class="mt-2">
+                    @DateTime.Today.ToString(
+                        "dddd, dd/MM/yyyy",
+                        new CultureInfo("vi-VN"))
+                </p>
+            </div>
+            <div class="welcome-symbol">⌂</div>
+        </div>
+
+        <h2 class="section-title">Tổng quan hệ thống</h2>
+
+        <div class="row g-3">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Tổng số phòng</span>
+                        <span class="stat-icon">⌂</span>
+                    </div>
+                    <div class="stat-number">@totalRooms</div>
+                    <div class="stat-note">Số phòng trong phạm vi quản lý</div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Phòng đang thuê</span>
+                        <span class="stat-icon"
+                              style="background:#dcfce7;color:#15803d">♙</span>
+                    </div>
+                    <div class="stat-number" style="color:#15803d">@occupiedRooms</div>
+                    <div class="stat-note">@occupiedPercent% tổng số phòng</div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Phòng còn trống</span>
+                        <span class="stat-icon"
+                              style="background:#fff1f2;color:#e11d48">⌂</span>
+                    </div>
+                    <div class="stat-number" style="color:#e11d48">@vacantRooms</div>
+                    <div class="stat-note">@vacantPercent% tổng số phòng</div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Doanh thu tháng này</span>
+                        <span class="stat-icon"
+                              style="background:#fef3c7;color:#a16207">₫</span>
+                    </div>
+                    <div class="stat-number" style="font-size:25px;color:#a16207">
+                        @revenue.ToString("N0") đ
+                    </div>
+                    <div class="stat-note">Tổng giao dịch ghi nhận trong tháng</div>
+                </div>
+            </div>
+
+            @if (isAdmin || isLandlord)
+            {
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span class="stat-label">Hợp đồng</span>
+                            <span class="stat-icon">▤</span>
+                        </div>
+                        <div class="stat-number">@totalContracts</div>
+                        <div class="stat-note">Hợp đồng trong phạm vi quản lý</div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span class="stat-label">Người thuê</span>
+                            <span class="stat-icon">♙</span>
+                        </div>
+                        <div class="stat-number">@totalTenants</div>
+                        <div class="stat-note">Người thuê trong phạm vi quản lý</div>
+                    </div>
+                </div>
+            }
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Hóa đơn</span>
+                        <span class="stat-icon">▧</span>
+                    </div>
+                    <div class="stat-number">@totalInvoices</div>
+                    <div class="stat-note">@unpaidInvoices hóa đơn chưa thanh toán hoặc quá hạn</div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Yêu cầu / Sự cố</span>
+                        <span class="stat-icon">♧</span>
+                    </div>
+                    <div class="stat-number">@totalRequests</div>
+                    <div class="stat-note">Yêu cầu trong phạm vi hiển thị</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-12 col-xl-6">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <span>◔ Tình trạng phòng</span>
+                        <a asp-controller="Rooms" asp-action="Index"
+                           class="btn btn-sm btn-outline-primary">Xem phòng</a>
+                    </div>
+
+                    @if (totalRooms > 0)
+                    {
+                        <div class="donut-area">
+                            <div class="donut">
+                                <div class="donut-center">
+                                    <strong>@totalRooms</strong>
+                                    <span>Tổng số phòng</span>
+                                </div>
+                            </div>
+
+                            <div class="legend">
+                                <div class="legend-row">
+                                    <span class="legend-dot"></span>
+                                    <div>
+                                        <strong>Đang cho thuê</strong>
+                                        <div class="text-secondary">@occupiedRooms phòng</div>
+                                    </div>
+                                    <span class="legend-value">@occupiedPercent%</span>
+                                </div>
+
+                                <div class="legend-row">
+                                    <span class="legend-dot vacant"></span>
+                                    <div>
+                                        <strong>Còn trống</strong>
+                                        <div class="text-secondary">@vacantRooms phòng</div>
+                                    </div>
+                                    <span class="legend-value">@vacantPercent%</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            Chưa có dữ liệu phòng để hiển thị biểu đồ.
+                            @if (isAdmin || isLandlord)
+                            {
+                                <div class="mt-3">
+                                    <a asp-controller="Rooms" asp-action="Create"
+                                       class="btn btn-primary">+ Thêm phòng đầu tiên</a>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-6">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <span>✦ Truy cập nhanh</span>
+                    </div>
+
+                    <div class="action-grid">
+                        <a asp-controller="Rooms" asp-action="Index"
+                           class="action-link">
+                            <span class="action-icon">⌂</span>
+                            <span>
+                                <strong>Quản lý phòng</strong>
+                                <small>Danh sách và tình trạng phòng</small>
+                            </span>
+                        </a>
+
+                        @if (isAdmin)
+                        {
+                            <a asp-controller="Users" asp-action="Index"
+                               class="action-link">
+                                <span class="action-icon">♙</span>
+                                <span>
+                                    <strong>Tài khoản</strong>
+                                    <small>Quản lý người dùng hệ thống</small>
+                                </span>
+                            </a>
+
+                            <a asp-controller="Tenants" asp-action="Index"
+                               class="action-link">
+                                <span class="action-icon">♧</span>
+                                <span>
+                                    <strong>Người thuê</strong>
+                                    <small>Thông tin người thuê phòng</small>
+                                </span>
+                            </a>
+                        }
+
+                        <a asp-controller="Contracts" asp-action="Index"
+                           class="action-link">
+                            <span class="action-icon">▤</span>
+                            <span>
+                                <strong>Hợp đồng</strong>
+                                <small>Quản lý hợp đồng cho thuê</small>
+                            </span>
+                        </a>
+
+                        <a asp-controller="Invoices" asp-action="Index"
+                           class="action-link">
+                            <span class="action-icon">▧</span>
+                            <span>
+                                <strong>Hóa đơn</strong>
+                                <small>Quản lý tiền phòng và dịch vụ</small>
+                            </span>
+                        </a>
+
+                        <a asp-controller="Payments" asp-action="Index"
+                           class="action-link">
+                            <span class="action-icon">₫</span>
+                            <span>
+                                <strong>Thanh toán</strong>
+                                <small>Theo dõi giao dịch thanh toán</small>
+                            </span>
+                        </a>
+
+                        <a asp-controller="Statistics" asp-action="Index"
+                           class="action-link">
+                            <span class="action-icon">▥</span>
+                            <span>
+                                <strong>Thống kê</strong>
+                                <small>Xem báo cáo quản lý</small>
+                            </span>
+                        </a>
+
+                        <a asp-controller="Requests" asp-action="Index"
+                           class="action-link">
+                            <span class="action-icon">♧</span>
+                            <span>
+                                <strong>Yêu cầu / Sự cố</strong>
+                                <small>Hỗ trợ và xử lý sự cố</small>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-12 col-xl-6">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <span>▧ Hóa đơn gần đây</span>
+                        <a asp-controller="Invoices" asp-action="Index"
+                           class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                    </div>
+
+                    @if (recentInvoices.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover dashboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã</th>
+                                        <th>Kỳ hóa đơn</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var invoice in recentInvoices)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Invoices"
+                                                   asp-action="Details"
+                                                   asp-route-id="@invoice.InvoiceID">
+                                                    #@invoice.InvoiceID
+                                                </a>
+                                            </td>
+                                            <td>@invoice.BillingMonth.ToString("MM/yyyy")</td>
+                                            <td>@invoice.Total.ToString("N0") đ</td>
+                                            <td>
+                                                @if (invoice.Status == "Paid")
+                                                {
+                                                    <span class="badge bg-success">Đã thanh toán</span>
+                                                }
+                                                else if (invoice.Status == "Overdue")
+                                                {
+                                                    <span class="badge bg-danger">Quá hạn</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">Chưa thanh toán</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">Chưa có hóa đơn.</div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-6">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <span>₫ Thanh toán gần đây</span>
+                        <a asp-controller="Payments" asp-action="Index"
+                           class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                    </div>
+
+                    @if (recentPayments.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover dashboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ngày thanh toán</th>
+                                        <th>Số tiền</th>
+                                        <th>Phương thức</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var payment in recentPayments)
+                                    {
+                                        <tr>
+                                            <td>@payment.PaymentDate.ToString("dd/MM/yyyy")</td>
+                                            <td class="fw-bold text-success">
+                                                @payment.Amount.ToString("N0") đ
+                                            </td>
+                                            <td>@payment.PaymentMethod</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">Chưa có giao dịch thanh toán.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
 </div>

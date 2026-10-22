@@ -1,0 +1,18 @@
+
+@{
+    ViewData["Title"] = "Đăng ký thành công";
+}
+
+<div class="container mt-5 text-center" style="max-width: 600px">
+    <h2>Đã gửi đăng ký thành công!</h2>
+    <p>
+        Tài khoản của bạn đang chờ Admin xét duyệt.
+        Bạn chỉ có thể đăng nhập sau khi được phê duyệt.
+    </p>
+
+    <a asp-controller="Account"
+       asp-action="Login"
+       class="btn btn-primary">
+        Quay lại đăng nhập
+    </a>
+</div>

@@ -1,0 +1,84 @@
+
+@model IEnumerable<RoomRentalManagement.Models.User>
+
+@{
+    ViewData["Title"] = "Tài khoản chờ duyệt";
+}
+
+<div class="container mt-4">
+    <h2>Tài khoản chờ Admin duyệt</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Message"]
+        </div>
+    }
+
+    <p>
+        <a asp-controller="Users" asp-action="Index"
+           class="btn btn-secondary">Tất cả tài khoản</a>
+    </p>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            Hiện không có tài khoản nào chờ duyệt.
+        </div>
+    }
+    else
+    {
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Họ tên</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.FullName</td>
+                        <td>@user.Username</td>
+                        <td>
+                            @(user.Role == "Landlord" ? "Chủ nhà" : "Người thuê")
+                        </td>
+                        <td>Chờ duyệt</td>
+                        <td>
+                            <form asp-controller="Users"
+                                  asp-action="Approve"
+                                  method="post"
+                                  class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id"
+                                       value="@user.UserID" />
+                                <button type="submit"
+                                        class="btn btn-success btn-sm">
+                                    Duyệt
+                                </button>
+                            </form>
+
+                            <form asp-controller="Users"
+                                  asp-action="Reject"
+                                  method="post"
+                                  class="d-inline"
+                                  onsubmit="return confirm('Chị có chắc muốn từ chối tài khoản này?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id"
+                                       value="@user.UserID" />
+                                <button type="submit"
+                                        class="btn btn-danger btn-sm">
+                                    Từ chối
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
